@@ -1,0 +1,586 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Trenirovka//Plan//RU
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Зал и футбол
+X-WR-TIMEZONE:Europe/Moscow
+BEGIN:VTIMEZONE
+TZID:Europe/Moscow
+X-LIC-LOCATION:Europe/Moscow
+BEGIN:STANDARD
+TZOFFSETFROM:+0300
+TZOFFSETTO:+0300
+TZNAME:MSK
+DTSTART:19700101T000000
+END:STANDARD
+END:VTIMEZONE
+
+BEGIN:VEVENT
+UID:gym-push-a-b0@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20260929T180000
+DTEND;TZID=Europe/Moscow:20260929T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TU
+EXDATE;TZID=Europe/Moscow:20261013T180000
+SUMMARY:Зал: Жим · схема A
+DESCRIPTION:Грудь/плечи/трицепс — схема A\n1 Жим штанги лёжа 4×8–10\n2 Наклон гантели ~30° 3×8–10\n3 Бабочка 3×10–12\n4 Жим от плеч рычаг 3×8–10\n5 Разведения в стороны 3×12–15\n6 Трицепс блок 3×10–12\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-legs-a-b0@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20261001T180000
+DTEND;TZID=Europe/Moscow:20261001T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TH
+SUMMARY:Зал: Ноги · схема A
+DESCRIPTION:Схема A\n1 Присед / goblet / тренажёр 4×8–10\n2 Румынская тяга 3×8–10\n3 Жим ногами 3×10–12\n4 Сгибание ног 3×10–12\n5 Икры сидя 3×12–15\n6 Планка / скручивания 3\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-pull-a-b0@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20261003T180000
+DTEND;TZID=Europe/Moscow:20261003T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=SA
+SUMMARY:Зал: Тяга · схема A
+DESCRIPTION:Спина/бицепс — схема A\n1 Тяга блока к груди 4×8–10\n2 Тяга сидя к поясу 3×8–10\n3 Рычажная / гантель 3×8–10\n4 Задняя дельта / face pull 3×12–15\n5 Бицепс штанга + добивка 3×8–10\n6 Молотки 3×10–12\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-push-b-b1@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20261027T180000
+DTEND;TZID=Europe/Moscow:20261027T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TU
+SUMMARY:Зал: Жим · схема B
+DESCRIPTION:Грудь/плечи/трицепс — схема B\n1 Жим гантелей лёжа 4×8–10\n2 Жим сидя вверх 3×8–10\n3 Кроссовер две верёвки 3×10–12\n4 Жим Арнольда 3×8–10\n5 Разведения в стороны 3×12–15\n6 Трицепс блок 3×10–12\ndocs/план-недели.md · ротация.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-legs-b-b1@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20261029T180000
+DTEND;TZID=Europe/Moscow:20261029T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TH
+SUMMARY:Зал: Ноги · схема B
+DESCRIPTION:Схема B\n1 Выпады с гантелями в ходьбе 3×10–12 шагов на ногу\n2 Румынская / сгибания первыми 3×8–10\n3 Присед 3×10–12\n4 Сгибание ног 3×10–12\n5 Икры 3×12–15\n6 Планка 3\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-pull-b-b1@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20261031T180000
+DTEND;TZID=Europe/Moscow:20261031T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=SA
+SUMMARY:Зал: Тяга · схема B
+DESCRIPTION:Спина/бицепс — схема B\n1 Подтягивания (резинка/гравитрон ок) 4×8–10\n2 Тяга гантели в наклоне 3×8–10\n3 Тяга сидя 3×8–10\n4 Задняя дельта 3×12–15\n5 Бицепс сидя одной рукой 3×8–10\n6 Молотки или пропуск 3×10–12\ndocs/план-недели.md · ротация.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-push-a-b2@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20261124T180000
+DTEND;TZID=Europe/Moscow:20261124T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TU
+SUMMARY:Зал: Жим · схема A
+DESCRIPTION:Грудь/плечи/трицепс — схема A\n1 Жим штанги лёжа 4×8–10\n2 Наклон гантели ~30° 3×8–10\n3 Бабочка 3×10–12\n4 Жим от плеч рычаг 3×8–10\n5 Разведения в стороны 3×12–15\n6 Трицепс блок 3×10–12\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-legs-a-b2@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20261126T180000
+DTEND;TZID=Europe/Moscow:20261126T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TH
+SUMMARY:Зал: Ноги · схема A
+DESCRIPTION:Схема A\n1 Присед / goblet / тренажёр 4×8–10\n2 Румынская тяга 3×8–10\n3 Жим ногами 3×10–12\n4 Сгибание ног 3×10–12\n5 Икры сидя 3×12–15\n6 Планка / скручивания 3\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-pull-a-b2@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20261128T180000
+DTEND;TZID=Europe/Moscow:20261128T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=SA
+EXDATE;TZID=Europe/Moscow:20261128T180000
+SUMMARY:Зал: Тяга · схема A
+DESCRIPTION:Спина/бицепс — схема A\n1 Тяга блока к груди 4×8–10\n2 Тяга сидя к поясу 3×8–10\n3 Рычажная / гантель 3×8–10\n4 Задняя дельта / face pull 3×12–15\n5 Бицепс штанга + добивка 3×8–10\n6 Молотки 3×10–12\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-push-b-b3@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20261222T180000
+DTEND;TZID=Europe/Moscow:20261222T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TU
+SUMMARY:Зал: Жим · схема B
+DESCRIPTION:Грудь/плечи/трицепс — схема B\n1 Жим гантелей лёжа 4×8–10\n2 Жим сидя вверх 3×8–10\n3 Кроссовер две верёвки 3×10–12\n4 Жим Арнольда 3×8–10\n5 Разведения в стороны 3×12–15\n6 Трицепс блок 3×10–12\ndocs/план-недели.md · ротация.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-legs-b-b3@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20261224T180000
+DTEND;TZID=Europe/Moscow:20261224T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TH
+EXDATE;TZID=Europe/Moscow:20270107T180000
+SUMMARY:Зал: Ноги · схема B
+DESCRIPTION:Схема B\n1 Выпады с гантелями в ходьбе 3×10–12 шагов на ногу\n2 Румынская / сгибания первыми 3×8–10\n3 Присед 3×10–12\n4 Сгибание ног 3×10–12\n5 Икры 3×12–15\n6 Планка 3\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-pull-b-b3@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20261226T180000
+DTEND;TZID=Europe/Moscow:20261226T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=SA
+SUMMARY:Зал: Тяга · схема B
+DESCRIPTION:Спина/бицепс — схема B\n1 Подтягивания (резинка/гравитрон ок) 4×8–10\n2 Тяга гантели в наклоне 3×8–10\n3 Тяга сидя 3×8–10\n4 Задняя дельта 3×12–15\n5 Бицепс сидя одной рукой 3×8–10\n6 Молотки или пропуск 3×10–12\ndocs/план-недели.md · ротация.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-push-a-b4@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270119T180000
+DTEND;TZID=Europe/Moscow:20270119T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TU
+SUMMARY:Зал: Жим · схема A
+DESCRIPTION:Грудь/плечи/трицепс — схема A\n1 Жим штанги лёжа 4×8–10\n2 Наклон гантели ~30° 3×8–10\n3 Бабочка 3×10–12\n4 Жим от плеч рычаг 3×8–10\n5 Разведения в стороны 3×12–15\n6 Трицепс блок 3×10–12\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-legs-a-b4@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270121T180000
+DTEND;TZID=Europe/Moscow:20270121T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TH
+SUMMARY:Зал: Ноги · схема A
+DESCRIPTION:Схема A\n1 Присед / goblet / тренажёр 4×8–10\n2 Румынская тяга 3×8–10\n3 Жим ногами 3×10–12\n4 Сгибание ног 3×10–12\n5 Икры сидя 3×12–15\n6 Планка / скручивания 3\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-pull-a-b4@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270123T180000
+DTEND;TZID=Europe/Moscow:20270123T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=SA
+SUMMARY:Зал: Тяга · схема A
+DESCRIPTION:Спина/бицепс — схема A\n1 Тяга блока к груди 4×8–10\n2 Тяга сидя к поясу 3×8–10\n3 Рычажная / гантель 3×8–10\n4 Задняя дельта / face pull 3×12–15\n5 Бицепс штанга + добивка 3×8–10\n6 Молотки 3×10–12\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-push-b-b5@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270216T180000
+DTEND;TZID=Europe/Moscow:20270216T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TU
+EXDATE;TZID=Europe/Moscow:20270216T180000
+SUMMARY:Зал: Жим · схема B
+DESCRIPTION:Грудь/плечи/трицепс — схема B\n1 Жим гантелей лёжа 4×8–10\n2 Жим сидя вверх 3×8–10\n3 Кроссовер две верёвки 3×10–12\n4 Жим Арнольда 3×8–10\n5 Разведения в стороны 3×12–15\n6 Трицепс блок 3×10–12\ndocs/план-недели.md · ротация.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-legs-b-b5@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270218T180000
+DTEND;TZID=Europe/Moscow:20270218T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TH
+SUMMARY:Зал: Ноги · схема B
+DESCRIPTION:Схема B\n1 Выпады с гантелями в ходьбе 3×10–12 шагов на ногу\n2 Румынская / сгибания первыми 3×8–10\n3 Присед 3×10–12\n4 Сгибание ног 3×10–12\n5 Икры 3×12–15\n6 Планка 3\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-pull-b-b5@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270220T180000
+DTEND;TZID=Europe/Moscow:20270220T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=SA
+SUMMARY:Зал: Тяга · схема B
+DESCRIPTION:Спина/бицепс — схема B\n1 Подтягивания (резинка/гравитрон ок) 4×8–10\n2 Тяга гантели в наклоне 3×8–10\n3 Тяга сидя 3×8–10\n4 Задняя дельта 3×12–15\n5 Бицепс сидя одной рукой 3×8–10\n6 Молотки или пропуск 3×10–12\ndocs/план-недели.md · ротация.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-push-a-b6@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270316T180000
+DTEND;TZID=Europe/Moscow:20270316T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TU
+EXDATE;TZID=Europe/Moscow:20270330T180000
+SUMMARY:Зал: Жим · схема A
+DESCRIPTION:Грудь/плечи/трицепс — схема A\n1 Жим штанги лёжа 4×8–10\n2 Наклон гантели ~30° 3×8–10\n3 Бабочка 3×10–12\n4 Жим от плеч рычаг 3×8–10\n5 Разведения в стороны 3×12–15\n6 Трицепс блок 3×10–12\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-legs-a-b6@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270318T180000
+DTEND;TZID=Europe/Moscow:20270318T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TH
+SUMMARY:Зал: Ноги · схема A
+DESCRIPTION:Схема A\n1 Присед / goblet / тренажёр 4×8–10\n2 Румынская тяга 3×8–10\n3 Жим ногами 3×10–12\n4 Сгибание ног 3×10–12\n5 Икры сидя 3×12–15\n6 Планка / скручивания 3\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-pull-a-b6@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270320T180000
+DTEND;TZID=Europe/Moscow:20270320T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=SA
+SUMMARY:Зал: Тяга · схема A
+DESCRIPTION:Спина/бицепс — схема A\n1 Тяга блока к груди 4×8–10\n2 Тяга сидя к поясу 3×8–10\n3 Рычажная / гантель 3×8–10\n4 Задняя дельта / face pull 3×12–15\n5 Бицепс штанга + добивка 3×8–10\n6 Молотки 3×10–12\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-push-b-b7@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270413T180000
+DTEND;TZID=Europe/Moscow:20270413T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TU
+SUMMARY:Зал: Жим · схема B
+DESCRIPTION:Грудь/плечи/трицепс — схема B\n1 Жим гантелей лёжа 4×8–10\n2 Жим сидя вверх 3×8–10\n3 Кроссовер две верёвки 3×10–12\n4 Жим Арнольда 3×8–10\n5 Разведения в стороны 3×12–15\n6 Трицепс блок 3×10–12\ndocs/план-недели.md · ротация.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-legs-b-b7@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270415T180000
+DTEND;TZID=Europe/Moscow:20270415T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TH
+SUMMARY:Зал: Ноги · схема B
+DESCRIPTION:Схема B\n1 Выпады с гантелями в ходьбе 3×10–12 шагов на ногу\n2 Румынская / сгибания первыми 3×8–10\n3 Присед 3×10–12\n4 Сгибание ног 3×10–12\n5 Икры 3×12–15\n6 Планка 3\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-pull-b-b7@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270417T180000
+DTEND;TZID=Europe/Moscow:20270417T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=SA
+SUMMARY:Зал: Тяга · схема B
+DESCRIPTION:Спина/бицепс — схема B\n1 Подтягивания (резинка/гравитрон ок) 4×8–10\n2 Тяга гантели в наклоне 3×8–10\n3 Тяга сидя 3×8–10\n4 Задняя дельта 3×12–15\n5 Бицепс сидя одной рукой 3×8–10\n6 Молотки или пропуск 3×10–12\ndocs/план-недели.md · ротация.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-push-a-b8@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270511T180000
+DTEND;TZID=Europe/Moscow:20270511T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TU
+EXDATE;TZID=Europe/Moscow:20270511T180000
+SUMMARY:Зал: Жим · схема A
+DESCRIPTION:Грудь/плечи/трицепс — схема A\n1 Жим штанги лёжа 4×8–10\n2 Наклон гантели ~30° 3×8–10\n3 Бабочка 3×10–12\n4 Жим от плеч рычаг 3×8–10\n5 Разведения в стороны 3×12–15\n6 Трицепс блок 3×10–12\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-legs-a-b8@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270513T180000
+DTEND;TZID=Europe/Moscow:20270513T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TH
+SUMMARY:Зал: Ноги · схема A
+DESCRIPTION:Схема A\n1 Присед / goblet / тренажёр 4×8–10\n2 Румынская тяга 3×8–10\n3 Жим ногами 3×10–12\n4 Сгибание ног 3×10–12\n5 Икры сидя 3×12–15\n6 Планка / скручивания 3\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-pull-a-b8@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270515T180000
+DTEND;TZID=Europe/Moscow:20270515T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=SA
+SUMMARY:Зал: Тяга · схема A
+DESCRIPTION:Спина/бицепс — схема A\n1 Тяга блока к груди 4×8–10\n2 Тяга сидя к поясу 3×8–10\n3 Рычажная / гантель 3×8–10\n4 Задняя дельта / face pull 3×12–15\n5 Бицепс штанга + добивка 3×8–10\n6 Молотки 3×10–12\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-push-b-b9@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270608T180000
+DTEND;TZID=Europe/Moscow:20270608T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TU
+SUMMARY:Зал: Жим · схема B
+DESCRIPTION:Грудь/плечи/трицепс — схема B\n1 Жим гантелей лёжа 4×8–10\n2 Жим сидя вверх 3×8–10\n3 Кроссовер две верёвки 3×10–12\n4 Жим Арнольда 3×8–10\n5 Разведения в стороны 3×12–15\n6 Трицепс блок 3×10–12\ndocs/план-недели.md · ротация.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-legs-b-b9@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270610T180000
+DTEND;TZID=Europe/Moscow:20270610T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TH
+SUMMARY:Зал: Ноги · схема B
+DESCRIPTION:Схема B\n1 Выпады с гантелями в ходьбе 3×10–12 шагов на ногу\n2 Румынская / сгибания первыми 3×8–10\n3 Присед 3×10–12\n4 Сгибание ног 3×10–12\n5 Икры 3×12–15\n6 Планка 3\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-pull-b-b9@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270612T180000
+DTEND;TZID=Europe/Moscow:20270612T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=SA
+EXDATE;TZID=Europe/Moscow:20270626T180000
+SUMMARY:Зал: Тяга · схема B
+DESCRIPTION:Спина/бицепс — схема B\n1 Подтягивания (резинка/гравитрон ок) 4×8–10\n2 Тяга гантели в наклоне 3×8–10\n3 Тяга сидя 3×8–10\n4 Задняя дельта 3×12–15\n5 Бицепс сидя одной рукой 3×8–10\n6 Молотки или пропуск 3×10–12\ndocs/план-недели.md · ротация.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-push-a-b10@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270706T180000
+DTEND;TZID=Europe/Moscow:20270706T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TU
+SUMMARY:Зал: Жим · схема A
+DESCRIPTION:Грудь/плечи/трицепс — схема A\n1 Жим штанги лёжа 4×8–10\n2 Наклон гантели ~30° 3×8–10\n3 Бабочка 3×10–12\n4 Жим от плеч рычаг 3×8–10\n5 Разведения в стороны 3×12–15\n6 Трицепс блок 3×10–12\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-legs-a-b10@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270708T180000
+DTEND;TZID=Europe/Moscow:20270708T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TH
+SUMMARY:Зал: Ноги · схема A
+DESCRIPTION:Схема A\n1 Присед / goblet / тренажёр 4×8–10\n2 Румынская тяга 3×8–10\n3 Жим ногами 3×10–12\n4 Сгибание ног 3×10–12\n5 Икры сидя 3×12–15\n6 Планка / скручивания 3\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-pull-a-b10@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270710T180000
+DTEND;TZID=Europe/Moscow:20270710T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=SA
+SUMMARY:Зал: Тяга · схема A
+DESCRIPTION:Спина/бицепс — схема A\n1 Тяга блока к груди 4×8–10\n2 Тяга сидя к поясу 3×8–10\n3 Рычажная / гантель 3×8–10\n4 Задняя дельта / face pull 3×12–15\n5 Бицепс штанга + добивка 3×8–10\n6 Молотки 3×10–12\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-push-b-b11@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270803T180000
+DTEND;TZID=Europe/Moscow:20270803T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TU
+SUMMARY:Зал: Жим · схема B
+DESCRIPTION:Грудь/плечи/трицепс — схема B\n1 Жим гантелей лёжа 4×8–10\n2 Жим сидя вверх 3×8–10\n3 Кроссовер две верёвки 3×10–12\n4 Жим Арнольда 3×8–10\n5 Разведения в стороны 3×12–15\n6 Трицепс блок 3×10–12\ndocs/план-недели.md · ротация.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-legs-b-b11@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270805T180000
+DTEND;TZID=Europe/Moscow:20270805T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TH
+EXDATE;TZID=Europe/Moscow:20270805T180000
+SUMMARY:Зал: Ноги · схема B
+DESCRIPTION:Схема B\n1 Выпады с гантелями в ходьбе 3×10–12 шагов на ногу\n2 Румынская / сгибания первыми 3×8–10\n3 Присед 3×10–12\n4 Сгибание ног 3×10–12\n5 Икры 3×12–15\n6 Планка 3\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-pull-b-b11@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270807T180000
+DTEND;TZID=Europe/Moscow:20270807T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=SA
+SUMMARY:Зал: Тяга · схема B
+DESCRIPTION:Спина/бицепс — схема B\n1 Подтягивания (резинка/гравитрон ок) 4×8–10\n2 Тяга гантели в наклоне 3×8–10\n3 Тяга сидя 3×8–10\n4 Задняя дельта 3×12–15\n5 Бицепс сидя одной рукой 3×8–10\n6 Молотки или пропуск 3×10–12\ndocs/план-недели.md · ротация.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-push-a-b12@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270831T180000
+DTEND;TZID=Europe/Moscow:20270831T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TU
+EXDATE;TZID=Europe/Moscow:20270914T180000
+SUMMARY:Зал: Жим · схема A
+DESCRIPTION:Грудь/плечи/трицепс — схема A\n1 Жим штанги лёжа 4×8–10\n2 Наклон гантели ~30° 3×8–10\n3 Бабочка 3×10–12\n4 Жим от плеч рычаг 3×8–10\n5 Разведения в стороны 3×12–15\n6 Трицепс блок 3×10–12\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-legs-a-b12@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270902T180000
+DTEND;TZID=Europe/Moscow:20270902T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TH
+SUMMARY:Зал: Ноги · схема A
+DESCRIPTION:Схема A\n1 Присед / goblet / тренажёр 4×8–10\n2 Румынская тяга 3×8–10\n3 Жим ногами 3×10–12\n4 Сгибание ног 3×10–12\n5 Икры сидя 3×12–15\n6 Планка / скручивания 3\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:gym-pull-a-b12@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270904T180000
+DTEND;TZID=Europe/Moscow:20270904T193000
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=SA
+SUMMARY:Зал: Тяга · схема A
+DESCRIPTION:Спина/бицепс — схема A\n1 Тяга блока к груди 4×8–10\n2 Тяга сидя к поясу 3×8–10\n3 Рычажная / гантель 3×8–10\n4 Задняя дельта / face pull 3×12–15\n5 Бицепс штанга + добивка 3×8–10\n6 Молотки 3×10–12\ndocs/план-недели.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:focus-Грудь-20261013@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20261013T180000
+DTEND;TZID=Europe/Moscow:20261013T193000
+SUMMARY:Фокус: Грудь
+DESCRIPTION:Вместо обычного жима. Веса НЕ максимальные (~70–80%).\n1 Жим штанги или гантелей 3×10–12\n2 Наклон гантели ~30° 3×10–12\n3 Жим сидя вверх 3×10–12\n4 Бабочка или кроссовер 3×12–15\n5 Кроссовер другим углом 3×12–15\n6 Отжимания / брусья 2×с запасом\nПлечи/трицепс не добивать. После — 4–5 дней без тяжёлой груди.\ndocs/фокус-дни.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:focus-Спина-20261128@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20261128T180000
+DTEND;TZID=Europe/Moscow:20261128T193000
+SUMMARY:Фокус: Спина
+DESCRIPTION:Вместо обычной тяги. Веса не максимальные.\n1 Подтягивания или тяга блока 3×10–12\n2 Тяга сидя 3×10–12\n3 Тяга гантели / рычаг 3×10–12\n4 Пулловер или прямые руки на блоке 3×12–15\n5 Задняя дельта / face pull 3×12–15\n6 Гиперэкстензия лёгкая 2–3×12–15\nБицепс сегодня лёгкий или пропуск.\ndocs/фокус-дни.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:focus-Ноги-20270107@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270107T180000
+DTEND;TZID=Europe/Moscow:20270107T193000
+SUMMARY:Фокус: Ноги
+DESCRIPTION:Вместо обычных ног. Веса не максимальные. Учти футбол в вс.\n1 Присед или goblet 3×10–12\n2 Выпады в ходьбе 3×10–12 шагов\n3 Жим ногами 3×10–12\n4 Румынская тяга 3×10–12\n5 Сгибание ног 3×12–15\n6 Икры 3×12–15\ndocs/фокус-дни.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:focus-Плечи-20270216@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270216T180000
+DTEND;TZID=Europe/Moscow:20270216T193000
+SUMMARY:Фокус: Плечи
+DESCRIPTION:Вместо обычного жима (грудь минимум). Веса не макс.\n1 Жим от плеч / Арнольд 3×10–12\n2 Разведения в стороны 3×12–15\n3 Задняя дельта / face pull 3×12–15\n4 Подъёмы вперёд лёгкие 2–3×12–15\n5 Ещё один вариант средних пучков (кабель/гантели) 3×12–15\ndocs/фокус-дни.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:focus-Руки-20270330@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270330T180000
+DTEND;TZID=Europe/Moscow:20270330T193000
+SUMMARY:Фокус: Руки
+DESCRIPTION:Короткий день 45–60 мин. Веса не макс.\nБицепс: штанга / сидя одной / молотки — 3 упражнения × 3\nТрицепс: блок / разгибания / брусья лёгко — 3 × 3\ndocs/фокус-дни.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:focus-Грудь-20270511@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270511T180000
+DTEND;TZID=Europe/Moscow:20270511T193000
+SUMMARY:Фокус: Грудь
+DESCRIPTION:Вместо обычного жима. Веса НЕ максимальные (~70–80%).\n1 Жим штанги или гантелей 3×10–12\n2 Наклон гантели ~30° 3×10–12\n3 Жим сидя вверх 3×10–12\n4 Бабочка или кроссовер 3×12–15\n5 Кроссовер другим углом 3×12–15\n6 Отжимания / брусья 2×с запасом\nПлечи/трицепс не добивать. После — 4–5 дней без тяжёлой груди.\ndocs/фокус-дни.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:focus-Спина-20270626@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270626T180000
+DTEND;TZID=Europe/Moscow:20270626T193000
+SUMMARY:Фокус: Спина
+DESCRIPTION:Вместо обычной тяги. Веса не максимальные.\n1 Подтягивания или тяга блока 3×10–12\n2 Тяга сидя 3×10–12\n3 Тяга гантели / рычаг 3×10–12\n4 Пулловер или прямые руки на блоке 3×12–15\n5 Задняя дельта / face pull 3×12–15\n6 Гиперэкстензия лёгкая 2–3×12–15\nБицепс сегодня лёгкий или пропуск.\ndocs/фокус-дни.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:focus-Ноги-20270805@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270805T180000
+DTEND;TZID=Europe/Moscow:20270805T193000
+SUMMARY:Фокус: Ноги
+DESCRIPTION:Вместо обычных ног. Веса не максимальные. Учти футбол в вс.\n1 Присед или goblet 3×10–12\n2 Выпады в ходьбе 3×10–12 шагов\n3 Жим ногами 3×10–12\n4 Румынская тяга 3×10–12\n5 Сгибание ног 3×12–15\n6 Икры 3×12–15\ndocs/фокус-дни.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:focus-Плечи-20270914@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270914T180000
+DTEND;TZID=Europe/Moscow:20270914T193000
+SUMMARY:Фокус: Плечи
+DESCRIPTION:Вместо обычного жима (грудь минимум). Веса не макс.\n1 Жим от плеч / Арнольд 3×10–12\n2 Разведения в стороны 3×12–15\n3 Задняя дельта / face pull 3×12–15\n4 Подъёмы вперёд лёгкие 2–3×12–15\n5 Ещё один вариант средних пучков (кабель/гантели) 3×12–15\ndocs/фокус-дни.md
+LOCATION:Зал
+END:VEVENT
+
+BEGIN:VEVENT
+UID:football-sun-year@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20261004T100000
+DTEND;TZID=Europe/Moscow:20261004T120000
+RRULE:FREQ=WEEKLY;COUNT=52;BYDAY=SU
+SUMMARY:Футбол (ноги в зале не качать)
+DESCRIPTION:Ноги — в четверг. Время игры поправь вручную.
+END:VEVENT
+
+BEGIN:VEVENT
+UID:rotation-switch-year@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20261026T090000
+DTEND;TZID=Europe/Moscow:20261026T091500
+RRULE:FREQ=WEEKLY;INTERVAL=4;COUNT=12;BYDAY=MO
+SUMMARY:Ротация: смена схемы A↔B
+DESCRIPTION:Каждые 4 недели новый блок. Смотри название событий (схема A/B).\nОтметь дату в docs/ротация.md и docs/трекер-весов.md
+END:VEVENT
+
+BEGIN:VEVENT
+UID:focus-check-year@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20261005T090000
+DTEND;TZID=Europe/Moscow:20261005T091500
+RRULE:FREQ=WEEKLY;INTERVAL=3;COUNT=17;BYDAY=MO
+SUMMARY:Проверка: нужен Фокус-день?
+DESCRIPTION:Если вес стоит 3+ недели — Фокус вместо обычного дня.\nВ году уже расставлены фокусы ~раз в 6 недель (можно удалить ненужные).\ndocs/фокус-дни.md
+END:VEVENT
+
+BEGIN:VEVENT
+UID:year-end-2027@trenirovka.local
+DTSTAMP:20260928T200000Z
+DTSTART;TZID=Europe/Moscow:20270927T090000
+DTEND;TZID=Europe/Moscow:20270927T091500
+SUMMARY:Год плана закончился — обнови ICS
+DESCRIPTION:Цикл ~52 недели закрыт. Попроси обновить docs/календарь/тренировки.ics на следующий год.
+END:VEVENT
+
+END:VCALENDAR
