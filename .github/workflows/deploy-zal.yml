@@ -86,3 +86,4 @@ jobs:
             if [ ! -f /etc/letsencrypt/live/zal.diabal.ru/fullchain.pem ]; then
               certbot --nginx -d zal.diabal.ru --non-interactive --agree-tos --redirect
             fi
+
