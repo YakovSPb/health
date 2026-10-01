@@ -1,4 +1,4 @@
-const CACHE = "zal-2";
+const CACHE = "zal-3";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -15,6 +15,11 @@ self.addEventListener("activate", (event) => {
       .keys()
       .then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))))
       .then(() => self.clients.claim())
+      .then(() =>
+        self.clients.matchAll({ type: "window" }).then((clients) => {
+          clients.forEach((client) => client.postMessage({ type: "zal-updated" }));
+        })
+      )
   );
 });
 

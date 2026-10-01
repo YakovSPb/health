@@ -452,5 +452,16 @@
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").catch(() => {});
+    navigator.serviceWorker.addEventListener("message", (event) => {
+      if (event.data && event.data.type === "zal-updated") {
+        location.reload();
+      }
+    });
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (refreshing) return;
+      refreshing = true;
+      location.reload();
+    });
   }
 })();
