@@ -15,6 +15,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check secrets
+        env:
+          HOST: ${{ secrets.SERVER_HOST }}
+          USER: ${{ secrets.SERVER_USERNAME }}
+          PORT: ${{ secrets.SERVER_PORT }}
+          KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          set -e
+          missing=
+          [ -n "$HOST" ] || missing="$missing SERVER_HOST"
+          [ -n "$USER" ] || missing="$missing SERVER_USERNAME"
+          [ -n "$PORT" ] || missing="$missing SERVER_PORT"
+          [ -n "$KEY" ] || missing="$missing SSH_PRIVATE_KEY"
+          if [ -n "$missing" ]; then
+            echo "Пустые секреты:$missing"
+            echo "Добавь их в YakovSPb/health → Settings → Secrets and variables → Actions"
+            exit 1
+          fi
+          echo "Секреты на месте. Длина ключа: ${#KEY}"
+
       - name: Upload zal
         uses: appleboy/scp-action@v0.1.7
         with:
