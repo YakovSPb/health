@@ -1,0 +1,61 @@
+name: Deploy zal
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "zal/**"
+      - ".github/workflows/deploy-zal.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Rsync and nginx
+        uses: easingthemes/ssh-deploy@v5.0.3
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.SERVER_HOST }}
+          REMOTE_USER: ${{ secrets.SERVER_USERNAME }}
+          REMOTE_PORT: ${{ secrets.SERVER_PORT || '22' }}
+          SOURCE: zal/
+          TARGET: /var/www/zal.diabal.ru/
+          ARGS: -avz --delete
+          EXCLUDE: /build.py, /__pycache__/
+          SCRIPT_BEFORE_REQUIRED: "true"
+          SCRIPT_AFTER_REQUIRED: "true"
+          SCRIPT_BEFORE: |
+            mkdir -p /var/www/zal.diabal.ru
+          SCRIPT_AFTER: |
+            set -euo pipefail
+            CONF=/etc/nginx/sites-available/zal.diabal.ru
+            if [ ! -f "$CONF" ]; then
+              printf '%s\n' \
+                'server {' \
+                '    listen 80;' \
+                '    listen [::]:80;' \
+                '    server_name zal.diabal.ru;' \
+                '    root /var/www/zal.diabal.ru;' \
+                '    index index.html;' \
+                '    location / {' \
+                '        try_files $uri $uri/ /index.html;' \
+                '    }' \
+                '    location = /index.html {' \
+                '        add_header Cache-Control "no-cache";' \
+                '    }' \
+                '    location = /sw.js {' \
+                '        add_header Cache-Control "no-cache";' \
+                '    }' \
+                '}' > "$CONF"
+              ln -sfn "$CONF" /etc/nginx/sites-enabled/zal.diabal.ru
+            fi
+            nginx -t
+            systemctl reload nginx
+            if [ ! -f /etc/letsencrypt/live/zal.diabal.ru/fullchain.pem ]; then
+              echo "Нужна A-запись zal.diabal.ru на этот сервер, в Cloudflare без прокси."
+              certbot --nginx -d zal.diabal.ru --non-interactive --agree-tos --redirect
+            fi
