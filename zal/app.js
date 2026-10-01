@@ -2,6 +2,8 @@
   const KEY = "zal.weights.v1";
   const GEAR_KEY = "zal.gear.v1";
   const SCHEME_KEY = "zal.scheme";
+  const AUTH_KEY = "zal.auth.v1";
+  const PASS = "111";
   const MONTHS = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
   const app = document.getElementById("app");
   const zoom = document.getElementById("zoom");
@@ -12,6 +14,28 @@
   }
 
   const plans = ZAL.days.concat(ZAL.focus);
+
+  function unlocked() {
+    return localStorage.getItem(AUTH_KEY) === "1";
+  }
+
+  function lockBar() {
+    if (unlocked()) {
+      return (
+        '<div class="lockbar open">' +
+          "<span>Веса можно менять</span>" +
+          '<button type="button" data-lock>Закрыть</button>' +
+        "</div>"
+      );
+    }
+    return (
+      '<form class="lockbar" data-unlock-form>' +
+        '<label>Пароль <input type="password" name="pass" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="•••" aria-label="Пароль для смены весов"></label>' +
+        '<button type="submit">Открыть</button>' +
+        '<p class="lock-msg" data-lock-msg hidden></p>' +
+      "</form>"
+    );
+  }
 
   function esc(value) {
     return String(value).replace(/[&<>"']/g, (ch) => ({
@@ -54,6 +78,23 @@
     const from = new Date(start.getTime() + index * 28 * 86400000);
     const to = new Date(from.getTime() + 27 * 86400000);
     return { scheme: index % 2 === 0 ? "A" : "B", to: to };
+  }
+
+  function weekIndex(date) {
+    const start = new Date(2026, 8, 29);
+    return Math.max(0, Math.floor((strip(date) - start) / 86400000 / 7));
+  }
+
+  function resolveSlot(slot, date) {
+    if (!slot || !slot.rotate) return slot;
+    if (weekIndex(date || new Date()) % 2 === 0) {
+      return { id: slot.id, sets: slot.sets, cue: slot.cue };
+    }
+    return {
+      id: slot.rotate,
+      sets: slot.rotateSets || slot.sets,
+      cue: slot.cue,
+    };
   }
 
   function chosenScheme() {
@@ -115,8 +156,9 @@
     if (!plan) return { name: "home" };
     if (parts[2] === "s") {
       const index = Number(parts[3]);
-      const slot = plan[scheme][index];
-      if (!slot) return { name: "list", plan, scheme };
+      const raw = plan[scheme][index];
+      if (!raw) return { name: "list", plan, scheme };
+      const slot = resolveSlot(raw);
       return { name: "detail", plan, scheme, exercise: ZAL.exercises[slot.id], id: slot.id, slot, back: "#/" + plan.id + "/" + scheme };
     }
     if (parts[2] === "x") {
@@ -159,42 +201,46 @@
     const exercise = ZAL.exercises[id];
     const value = getWeight(id);
     const custom = isCustom(id);
+    const canEdit = unlocked();
+    const disabled = canEdit ? "" : " disabled";
     const status = custom ? "мой вес" : "из трекера";
     const badge = exercise.estimate && !custom ? '<span class="badge" data-estimate-for="' + esc(id) + '">оценка</span>' : '<span data-estimate-for="' + esc(id) + '"></span>';
+    const lockNote = canEdit ? "" : " · только просмотр";
     if (exercise.kind === "text") {
       return (
-        '<div class="stepper text" data-stop>' +
-          '<label class="weight"><input data-weight-for="' + esc(id) + '" value="' + esc(value) + '" inputmode="text" autocomplete="off" aria-label="Вес или помощь"></label>' +
+        '<div class="stepper text' + (canEdit ? "" : " locked") + '" data-stop>' +
+          '<label class="weight"><input data-weight-for="' + esc(id) + '" value="' + esc(value) + '" inputmode="text" autocomplete="off" aria-label="Вес или помощь"' + disabled + "></label>" +
         "</div>" +
-        '<p class="weight-meta"><span>' + esc(exercise.note) + "</span><span data-status-for=\"" + esc(id) + '">' + esc(status) + "</span></p>"
+        '<p class="weight-meta"><span>' + esc(exercise.note) + lockNote + '</span><span data-status-for="' + esc(id) + '">' + esc(status) + "</span></p>"
       );
     }
     const delta = stepLabel(exercise.step);
     return (
-      '<div class="stepper" data-stop>' +
-        '<button type="button" class="step" data-step="-1" data-id="' + esc(id) + '" aria-label="Убавить ' + delta + '"><span class="sign">−</span><span class="delta">' + delta + "</span></button>" +
-        '<label class="weight"><input data-weight-for="' + esc(id) + '" value="' + esc(value) + '" inputmode="decimal" autocomplete="off" enterkeyhint="done" aria-label="Вес"><span class="unit">кг</span></label>' +
-        '<button type="button" class="step" data-step="1" data-id="' + esc(id) + '" aria-label="Прибавить ' + delta + '"><span class="sign">+</span><span class="delta">' + delta + "</span></button>" +
+      '<div class="stepper' + (canEdit ? "" : " locked") + '" data-stop>' +
+        '<button type="button" class="step" data-step="-1" data-id="' + esc(id) + '" aria-label="Убавить ' + delta + '"' + disabled + '><span class="sign">−</span><span class="delta">' + delta + "</span></button>" +
+        '<label class="weight"><input data-weight-for="' + esc(id) + '" value="' + esc(value) + '" inputmode="decimal" autocomplete="off" enterkeyhint="done" aria-label="Вес"' + disabled + '><span class="unit">кг</span></label>' +
+        '<button type="button" class="step" data-step="1" data-id="' + esc(id) + '" aria-label="Прибавить ' + delta + '"' + disabled + '><span class="sign">+</span><span class="delta">' + delta + "</span></button>" +
       "</div>" +
-      '<p class="weight-meta"><span>' + esc(exercise.note) + " " + badge + '</span><span data-status-for="' + esc(id) + '">' + esc(status) + "</span></p>"
+      '<p class="weight-meta"><span>' + esc(exercise.note) + " " + badge + lockNote + '</span><span data-status-for="' + esc(id) + '">' + esc(status) + "</span></p>"
     );
   }
 
   function backup() {
+    const canEdit = unlocked();
     return (
       '<details class="backup"><summary>Веса в этом телефоне</summary>' +
       "<p>Цифры не уходят на сервер. Другой телефон их не увидит, пока не загрузишь файл.</p>" +
-      '<div class="row"><button type="button" id="export">Скачать веса</button>' +
-      '<label class="file">Загрузить<input id="import" type="file" accept="application/json"></label></div>' +
-      '<p id="import-msg"></p></details>'
+      (canEdit
+        ? '<div class="row"><button type="button" id="export">Скачать веса</button>' +
+          '<label class="file">Загрузить<input id="import" type="file" accept="application/json"></label></div>' +
+          '<p id="import-msg"></p>'
+        : "<p>Скачать и загрузить веса можно после пароля сверху.</p>") +
+      "</details>"
     );
   }
 
   function renderHome() {
-    const sunday = new Date().getDay() === 0;
-    const note = sunday
-      ? "Сегодня футбол. Ноги в зале не качаем."
-      : "Сегодня не силовой день. Открой тренировку, на которую идёшь.";
+    const note = "Сегодня не силовой день. Открой тренировку, на которую идёшь.";
     const cards = ZAL.days.map((day) =>
       '<a href="' + href(day, chosenScheme()) + '"><strong>' + esc(day.title) + "</strong><span>" + esc(day.kind) + " · вариант " + esc(chosenScheme()) + "</span></a>"
     ).join("");
@@ -214,18 +260,19 @@
       ? " Открыт вариант " + scheme + ", в блоке до " + fmt(block.to) + " — " + block.scheme + "."
       : "";
     const rows = plan[scheme].map((slot, index) => {
-      const exercise = ZAL.exercises[slot.id];
+      const shown = resolveSlot(slot);
+      const exercise = ZAL.exercises[shown.id];
       const open = href(plan, scheme, "/s/" + index);
-      const cue = slot.cue ? '<p class="cue">' + esc(slot.cue) + "</p>" : "";
+      const cue = shown.cue ? '<p class="cue">' + esc(shown.cue) + "</p>" : "";
       return (
         '<article class="ex">' +
           '<a class="ex-open" href="' + open + '">' +
             '<img class="thumb" alt="" src="' + esc(exercise.image) + '">' +
             "<div><h2>" + (index + 1) + ". " + esc(exercise.title) + "</h2>" +
-            '<p class="sets">' + esc(slot.sets) + "</p>" + cue +
-            '<p class="more">Техника, фото, замена</p></div>' +
+            '<p class="sets">' + esc(shown.sets) + "</p>" + cue +
+            "</div>" +
           "</a>" +
-          stepper(slot.id) +
+          stepper(shown.id) +
         "</article>"
       );
     }).join("");
