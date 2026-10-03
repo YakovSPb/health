@@ -20,17 +20,10 @@
   }
 
   function lockBar() {
-    if (unlocked()) {
-      return (
-        '<div class="lockbar open">' +
-          "<span>Веса можно менять</span>" +
-          '<button type="button" data-lock>Закрыть</button>' +
-        "</div>"
-      );
-    }
+    if (unlocked()) return "";
     return (
       '<form class="lockbar" data-unlock-form>' +
-        '<label>Пароль <input type="password" name="pass" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="132" aria-label="Пароль для смены весов"></label>' +
+        '<label>Пароль <input type="password" name="pass" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="132" aria-label="Пароль для смены весов"></label>' +
         '<button type="submit">Открыть</button>' +
         '<p class="lock-msg" data-lock-msg hidden></p>' +
       "</form>"
@@ -384,11 +377,6 @@
   });
 
   app.addEventListener("click", (event) => {
-    if (event.target.closest("[data-lock]")) {
-      localStorage.removeItem(AUTH_KEY);
-      render();
-      return;
-    }
     const stepBtn = event.target.closest("[data-step]");
     if (stepBtn) {
       if (!unlocked()) return;
