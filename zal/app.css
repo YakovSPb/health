@@ -395,6 +395,41 @@ button { cursor: pointer; }
   opacity: 0.45;
 }
 
+#savebar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  padding:
+    10px 14px
+    calc(10px + env(safe-area-inset-bottom))
+    14px;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--line);
+}
+
+#savebar[hidden] { display: none; }
+
+#savebar button {
+  display: block;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  border: 0;
+  border-radius: 14px;
+  min-height: 52px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+
+body.has-savebar #app {
+  padding-bottom: calc(88px + env(safe-area-inset-bottom));
+}
+
 .backup {
   margin-top: 18px;
   color: var(--muted);

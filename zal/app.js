@@ -7,6 +7,8 @@
   const MONTHS = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
   const app = document.getElementById("app");
   const zoom = document.getElementById("zoom");
+  const savebar = document.getElementById("savebar");
+  const draft = Object.create(null);
 
   if (!window.ZAL) {
     app.textContent = "Не загрузился data.js";
@@ -23,11 +25,40 @@
     if (unlocked()) return "";
     return (
       '<form class="lockbar" data-unlock-form>' +
-        '<label>Пароль <input type="password" name="pass" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="132" aria-label="Пароль для смены весов"></label>' +
+        '<label>Пароль <input type="password" name="pass" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="•••" aria-label="Пароль для смены весов"></label>' +
         '<button type="submit">Открыть</button>' +
         '<p class="lock-msg" data-lock-msg hidden></p>' +
       "</form>"
     );
+  }
+
+  function hasDraft() {
+    return Object.keys(draft).length > 0;
+  }
+
+  function updateSaveBar() {
+    const show = unlocked() && hasDraft();
+    savebar.hidden = !show;
+    document.body.classList.toggle("has-savebar", show);
+  }
+
+  function setDraft(id, value) {
+    draft[id] = value;
+    updateSaveBar();
+  }
+
+  function commitDraft() {
+    if (!hasDraft()) return;
+    const saved = weights();
+    const ids = Object.keys(draft);
+    ids.forEach((id) => {
+      saved[id] = draft[id];
+      delete draft[id];
+    });
+    localStorage.setItem(KEY, JSON.stringify(saved));
+    ids.forEach(markStatus);
+    updateSaveBar();
+    if (navigator.vibrate) navigator.vibrate(12);
   }
 
   function esc(value) {
@@ -117,19 +148,21 @@
   }
 
   function getWeight(id) {
+    if (Object.prototype.hasOwnProperty.call(draft, id)) return draft[id];
     const saved = weights();
     if (Object.prototype.hasOwnProperty.call(saved, id)) return saved[id];
     return ZAL.exercises[id].weight;
   }
 
   function isCustom(id) {
-    return Object.prototype.hasOwnProperty.call(weights(), id);
+    return Object.prototype.hasOwnProperty.call(draft, id)
+      || Object.prototype.hasOwnProperty.call(weights(), id);
   }
 
-  function saveWeight(id, value) {
-    const saved = weights();
-    saved[id] = value;
-    localStorage.setItem(KEY, JSON.stringify(saved));
+  function weightStatus(id) {
+    if (Object.prototype.hasOwnProperty.call(draft, id)) return "не сохранено";
+    if (Object.prototype.hasOwnProperty.call(weights(), id)) return "мой вес";
+    return "из трекера";
   }
 
   function bump(value, kind, step, dir) {
@@ -196,7 +229,7 @@
     const custom = isCustom(id);
     const canEdit = unlocked();
     const disabled = canEdit ? "" : " disabled";
-    const status = custom ? "мой вес" : "из трекера";
+    const status = weightStatus(id);
     const badge = exercise.estimate && !custom ? '<span class="badge" data-estimate-for="' + esc(id) + '">оценка</span>' : '<span data-estimate-for="' + esc(id) + '"></span>';
     const lockNote = canEdit ? "" : " · только просмотр";
     if (exercise.kind === "text") {
@@ -343,6 +376,16 @@
     if (route.name === "home") renderHome();
     else if (route.name === "detail") renderDetail(route);
     else renderList(route.plan, route.scheme);
+    updateSaveBar();
+  }
+
+  function markDirty(id) {
+    document.querySelectorAll('[data-status-for="' + CSS.escape(id) + '"]').forEach((node) => {
+      node.textContent = "не сохранено";
+    });
+    document.querySelectorAll('[data-estimate-for="' + CSS.escape(id) + '"]').forEach((node) => {
+      node.textContent = "";
+    });
   }
 
   function markStatus(id) {
@@ -376,6 +419,11 @@
     }
   });
 
+  savebar.addEventListener("click", (event) => {
+    if (!event.target.closest("[data-save]")) return;
+    commitDraft();
+  });
+
   app.addEventListener("click", (event) => {
     const stepBtn = event.target.closest("[data-step]");
     if (stepBtn) {
@@ -383,11 +431,11 @@
       const id = stepBtn.dataset.id;
       const exercise = ZAL.exercises[id];
       const next = bump(getWeight(id), exercise.kind, exercise.step, Number(stepBtn.dataset.step));
-      saveWeight(id, next);
+      setDraft(id, next);
       document.querySelectorAll('[data-weight-for="' + CSS.escape(id) + '"]').forEach((input) => {
         input.value = next;
       });
-      markStatus(id);
+      markDirty(id);
       if (navigator.vibrate) navigator.vibrate(8);
       return;
     }
@@ -433,8 +481,8 @@
   app.addEventListener("input", (event) => {
     const input = event.target.closest("[data-weight-for]");
     if (!input || !unlocked()) return;
-    saveWeight(input.dataset.weightFor, input.value);
-    markStatus(input.dataset.weightFor);
+    setDraft(input.dataset.weightFor, input.value);
+    markDirty(input.dataset.weightFor);
   });
 
   app.addEventListener("change", (event) => {
@@ -448,6 +496,7 @@
         const data = JSON.parse(String(reader.result));
         if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error("format");
         localStorage.setItem(KEY, JSON.stringify(data));
+        Object.keys(draft).forEach((id) => delete draft[id]);
         render();
       } catch (err) {
         if (msg) msg.textContent = "Файл не подошёл. Нужен json, который скачан отсюда.";
