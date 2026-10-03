@@ -48,7 +48,7 @@ jobs:
           overwrite: true
           rm: true
 
-      - name: Nginx and SSL
+      - name: Nginx, PHP and SSL
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -59,7 +59,38 @@ jobs:
           command_timeout: 10m
           script: |
             set -euo pipefail
-            mkdir -p /var/www/zal.diabal.ru
+            mkdir -p /var/www/zal.diabal.ru /var/lib/zal-diabal
+            chown -R www-data:www-data /var/lib/zal-diabal
+            chmod 755 /var/lib/zal-diabal
+
+            if ! ls /run/php/php*-fpm.sock >/dev/null 2>&1; then
+              export DEBIAN_FRONTEND=noninteractive
+              apt-get update -y
+              apt-get install -y php-fpm
+            fi
+
+            PHP_SOCK=
+            for s in /run/php/php*-fpm.sock; do
+              if [ -S "$s" ]; then
+                PHP_SOCK=$s
+                break
+              fi
+            done
+            if [ -z "$PHP_SOCK" ]; then
+              echo "Нет php-fpm socket"
+              exit 1
+            fi
+
+            cat > /etc/nginx/snippets/zal-weights-api.conf <<EOF
+            location = /weights-api.php {
+                include snippets/fastcgi-php.conf;
+                fastcgi_pass unix:${PHP_SOCK};
+                add_header Cache-Control "no-store" always;
+            }
+            EOF
+            # убрать случайный отступ YAML/скрипта в snippet
+            sed -i 's/^[[:space:]]*//' /etc/nginx/snippets/zal-weights-api.conf
+
             CONF=/etc/nginx/sites-available/zal.diabal.ru
             if [ ! -f "$CONF" ]; then
               printf '%s\n' \
@@ -69,6 +100,7 @@ jobs:
                 '    server_name zal.diabal.ru;' \
                 '    root /var/www/zal.diabal.ru;' \
                 '    index index.html;' \
+                '    include /etc/nginx/snippets/zal-weights-api.conf;' \
                 '    location / {' \
                 '        try_files $uri $uri/ /index.html;' \
                 '    }' \
@@ -80,10 +112,14 @@ jobs:
                 '    }' \
                 '}' > "$CONF"
               ln -sfn "$CONF" /etc/nginx/sites-enabled/zal.diabal.ru
+            elif ! grep -q 'zal-weights-api.conf' "$CONF"; then
+              sed -i '/root \/var\/www\/zal.diabal.ru;/a\    include /etc/nginx/snippets/zal-weights-api.conf;' "$CONF"
             fi
+
             nginx -t
             systemctl reload nginx
+            systemctl reload "php$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')-fpm" 2>/dev/null || true
+
             if [ ! -f /etc/letsencrypt/live/zal.diabal.ru/fullchain.pem ]; then
               certbot --nginx -d zal.diabal.ru --non-interactive --agree-tos --redirect
             fi
-

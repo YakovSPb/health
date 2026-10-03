@@ -4,11 +4,13 @@
   const SCHEME_KEY = "zal.scheme";
   const AUTH_KEY = "zal.auth.v1";
   const PASS = "132";
+  const API = "weights-api.php";
   const MONTHS = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
   const app = document.getElementById("app");
   const zoom = document.getElementById("zoom");
   const savebar = document.getElementById("savebar");
   const draft = Object.create(null);
+  let syncing = false;
 
   if (!window.ZAL) {
     app.textContent = "Не загрузился data.js";
@@ -37,9 +39,13 @@
   }
 
   function updateSaveBar() {
-    const show = unlocked() && hasDraft();
+    const show = unlocked() && (hasDraft() || syncing);
     savebar.hidden = !show;
     document.body.classList.toggle("has-savebar", show);
+    const btn = savebar.querySelector("[data-save]");
+    if (!btn) return;
+    btn.disabled = syncing;
+    btn.textContent = syncing ? "Сохраняю…" : "Сохранить";
   }
 
   function setDraft(id, value) {
@@ -47,8 +53,33 @@
     updateSaveBar();
   }
 
+  function pullWeights() {
+    return fetch(API, { cache: "no-store" })
+      .then((res) => {
+        if (!res.ok) throw new Error("pull");
+        return res.json();
+      })
+      .then((data) => {
+        if (!data || typeof data !== "object" || Array.isArray(data)) return false;
+        localStorage.setItem(KEY, JSON.stringify(data));
+        return true;
+      })
+      .catch(() => false);
+  }
+
+  function pushWeights(saved) {
+    return fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pass: PASS, weights: saved }),
+    }).then((res) => {
+      if (!res.ok) throw new Error("push");
+      return true;
+    });
+  }
+
   function commitDraft() {
-    if (!hasDraft()) return;
+    if (!hasDraft() || syncing) return;
     const saved = weights();
     const ids = Object.keys(draft);
     ids.forEach((id) => {
@@ -56,9 +87,24 @@
       delete draft[id];
     });
     localStorage.setItem(KEY, JSON.stringify(saved));
-    ids.forEach(markStatus);
+    syncing = true;
     updateSaveBar();
-    if (navigator.vibrate) navigator.vibrate(12);
+    pushWeights(saved)
+      .then(() => {
+        ids.forEach(markStatus);
+        if (navigator.vibrate) navigator.vibrate(12);
+      })
+      .catch(() => {
+        ids.forEach((id) => {
+          document.querySelectorAll('[data-status-for="' + CSS.escape(id) + '"]').forEach((node) => {
+            node.textContent = "только тут, сервер недоступен";
+          });
+        });
+      })
+      .finally(() => {
+        syncing = false;
+        updateSaveBar();
+      });
   }
 
   function esc(value) {
@@ -254,13 +300,13 @@
   function backup() {
     const canEdit = unlocked();
     return (
-      '<details class="backup"><summary>Веса в этом телефоне</summary>' +
-      "<p>Цифры не уходят на сервер. Другой телефон их не увидит, пока не загрузишь файл.</p>" +
+      '<details class="backup"><summary>Веса и синхронизация</summary>' +
+      "<p>После «Сохранить» веса уходят на сервер и появляются на других устройствах.</p>" +
       (canEdit
         ? '<div class="row"><button type="button" id="export">Скачать веса</button>' +
           '<label class="file">Загрузить<input id="import" type="file" accept="application/json"></label></div>' +
           '<p id="import-msg"></p>'
-        : "<p>Скачать и загрузить веса можно после пароля сверху.</p>") +
+        : "<p>Скачать и загрузить файл можно после пароля сверху.</p>") +
       "</details>"
     );
   }
@@ -509,14 +555,31 @@
     zoom.hidden = true;
   });
 
-  if (!location.hash) {
-    const day = todayDay();
-    if (day) location.replace("#/" + day.id + "/" + chosenScheme());
-    else location.replace("#/home");
+  function bootRoute() {
+    if (!location.hash) {
+      const day = todayDay();
+      if (day) location.replace("#/" + day.id + "/" + chosenScheme());
+      else location.replace("#/home");
+    }
+  }
+
+  function refreshFromServer() {
+    if (hasDraft() || syncing) return Promise.resolve();
+    return pullWeights().then((ok) => {
+      if (ok) render();
+    });
   }
 
   window.addEventListener("hashchange", render);
-  render();
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") refreshFromServer();
+  });
+  window.addEventListener("focus", refreshFromServer);
+
+  pullWeights().finally(() => {
+    bootRoute();
+    render();
+  });
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").catch(() => {});
