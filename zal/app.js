@@ -3,7 +3,7 @@
   const GEAR_KEY = "zal.gear.v1";
   const SCHEME_KEY = "zal.scheme";
   const AUTH_KEY = "zal.auth.v1";
-  const PASS = "111";
+  const PASS = "132";
   const MONTHS = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
   const app = document.getElementById("app");
   const zoom = document.getElementById("zoom");
@@ -30,7 +30,7 @@
     }
     return (
       '<form class="lockbar" data-unlock-form>' +
-        '<label>Пароль <input type="password" name="pass" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="•••" aria-label="Пароль для смены весов"></label>' +
+        '<label>Пароль <input type="password" name="pass" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="132" aria-label="Пароль для смены весов"></label>' +
         '<button type="submit">Открыть</button>' +
         '<p class="lock-msg" data-lock-msg hidden></p>' +
       "</form>"
@@ -249,6 +249,7 @@
     ).join("");
     app.innerHTML =
       '<header class="top"><div class="brand"><h1>Зал</h1></div></header>' +
+      lockBar() +
       '<p class="hint">' + esc(note) + "</p>" +
       '<div class="home-list">' + cards + focus + "</div>" +
       backup();
@@ -278,6 +279,7 @@
     }).join("");
     app.innerHTML =
       '<header class="top"><div class="brand"><h1>Зал</h1><p>блок до ' + esc(fmt(block.to)) + "</p></div>" +
+      lockBar() +
       chips(plan, scheme) +
       '<div class="dayline"><h2>' + esc(plan.title) + "</h2>" +
       '<div class="scheme" role="group" aria-label="Вариант">' +
@@ -325,6 +327,7 @@
     app.innerHTML =
       '<article class="detail">' +
         '<div class="backrow"><button type="button" data-back>Назад</button><a href="' + href(route.plan, route.scheme) + '">К тренировке</a></div>' +
+        lockBar() +
         "<h2>" + esc(exercise.title) + "</h2>" +
         (sets ? '<p class="sets">' + esc(sets) + "</p>" : "") +
         cue +
@@ -358,9 +361,37 @@
     });
   }
 
+  app.addEventListener("submit", (event) => {
+    const form = event.target.closest("[data-unlock-form]");
+    if (!form) return;
+    event.preventDefault();
+    const input = form.querySelector('input[name="pass"]');
+    const msg = form.querySelector("[data-lock-msg]");
+    const value = input ? String(input.value).trim() : "";
+    if (value === PASS) {
+      localStorage.setItem(AUTH_KEY, "1");
+      render();
+      return;
+    }
+    if (msg) {
+      msg.hidden = false;
+      msg.textContent = "Неверный пароль";
+    }
+    if (input) {
+      input.value = "";
+      input.focus();
+    }
+  });
+
   app.addEventListener("click", (event) => {
+    if (event.target.closest("[data-lock]")) {
+      localStorage.removeItem(AUTH_KEY);
+      render();
+      return;
+    }
     const stepBtn = event.target.closest("[data-step]");
     if (stepBtn) {
+      if (!unlocked()) return;
       const id = stepBtn.dataset.id;
       const exercise = ZAL.exercises[id];
       const next = bump(getWeight(id), exercise.kind, exercise.step, Number(stepBtn.dataset.step));
@@ -413,7 +444,7 @@
 
   app.addEventListener("input", (event) => {
     const input = event.target.closest("[data-weight-for]");
-    if (!input) return;
+    if (!input || !unlocked()) return;
     saveWeight(input.dataset.weightFor, input.value);
     markStatus(input.dataset.weightFor);
   });
