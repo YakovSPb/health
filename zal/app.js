@@ -269,13 +269,28 @@
     );
   }
 
+  function unitOf(exercise) {
+    return exercise.unit || "кг";
+  }
+
+  function displayWeight(id) {
+    const exercise = ZAL.exercises[id];
+    let value = String(getWeight(id));
+    if (unitOf(exercise) === "сек") {
+      const num = parseNum(value);
+      if (num != null) value = formatNum(num);
+    }
+    return value;
+  }
+
   function stepper(id) {
     const exercise = ZAL.exercises[id];
-    const value = getWeight(id);
+    const value = displayWeight(id);
     const custom = isCustom(id);
     const canEdit = unlocked();
     const disabled = canEdit ? "" : " disabled";
     const status = weightStatus(id);
+    const unit = unitOf(exercise);
     const badge = exercise.estimate && !custom ? '<span class="badge" data-estimate-for="' + esc(id) + '">оценка</span>' : '<span data-estimate-for="' + esc(id) + '"></span>';
     const lockNote = canEdit ? "" : " · только просмотр";
     if (exercise.kind === "text") {
@@ -287,10 +302,11 @@
       );
     }
     const delta = stepLabel(exercise.step);
+    const label = unit === "сек" ? "Секунды" : "Вес";
     return (
       '<div class="stepper' + (canEdit ? "" : " locked") + '" data-stop>' +
         '<button type="button" class="step" data-step="-1" data-id="' + esc(id) + '" aria-label="Убавить ' + delta + '"' + disabled + '><span class="sign">−</span><span class="delta">' + delta + "</span></button>" +
-        '<label class="weight"><input data-weight-for="' + esc(id) + '" value="' + esc(value) + '" inputmode="decimal" autocomplete="off" enterkeyhint="done" aria-label="Вес"' + disabled + '><span class="unit">кг</span></label>' +
+        '<label class="weight"><input data-weight-for="' + esc(id) + '" value="' + esc(value) + '" inputmode="decimal" autocomplete="off" enterkeyhint="done" aria-label="' + label + '"' + disabled + '><span class="unit">' + esc(unit) + "</span></label>" +
         '<button type="button" class="step" data-step="1" data-id="' + esc(id) + '" aria-label="Прибавить ' + delta + '"' + disabled + '><span class="sign">+</span><span class="delta">' + delta + "</span></button>" +
       "</div>" +
       '<p class="weight-meta"><span>' + esc(exercise.note) + " " + badge + lockNote + '</span><span data-status-for="' + esc(id) + '">' + esc(status) + "</span></p>"
@@ -389,7 +405,7 @@
           return (
             '<a class="sub" href="' + href(route.plan, route.scheme, "/x/" + encodeURIComponent(id)) + '">' +
               '<img alt="" src="' + esc(item.image) + '">' +
-              "<div><strong>" + esc(item.title) + "</strong><span>" + esc(getWeight(id)) + (item.kind === "text" ? "" : " кг") + " · " + esc(item.swap) + mark + "</span></div>" +
+              "<div><strong>" + esc(item.title) + "</strong><span>" + esc(displayWeight(id)) + (item.kind === "text" ? "" : " " + unitOf(item)) + " · " + esc(item.swap) + mark + "</span></div>" +
             "</a>"
           );
         }).join("")
