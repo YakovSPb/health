@@ -276,7 +276,7 @@
   function displayWeight(id) {
     const exercise = ZAL.exercises[id];
     let value = String(getWeight(id));
-    if (unitOf(exercise) === "сек") {
+    if (unitOf(exercise) === "сек" || unitOf(exercise) === "раз") {
       const num = parseNum(value);
       if (num != null) value = formatNum(num);
     }
@@ -302,7 +302,7 @@
       );
     }
     const delta = stepLabel(exercise.step);
-    const label = unit === "сек" ? "Секунды" : "Вес";
+    const label = unit === "сек" ? "Секунды" : unit === "раз" ? "Повторы" : "Вес";
     return (
       '<div class="stepper' + (canEdit ? "" : " locked") + '" data-stop>' +
         '<button type="button" class="step" data-step="-1" data-id="' + esc(id) + '" aria-label="Убавить ' + delta + '"' + disabled + '><span class="sign">−</span><span class="delta">' + delta + "</span></button>" +
