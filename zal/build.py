@@ -41,7 +41,6 @@ META = {
     "разгибания-трицепс-блок": dict(kind="num", step=1, weight="14", note="блок", swap="трицепс", role="изоляция", gears=["канат", "прямая рукоять"]),
     "скручивания": dict(kind="num", step=1, weight="12", note="на подход, скамья / пол", swap="корпус", role="изоляция", unit="раз"),
     "пресс-тренажёр": dict(kind="num", step=5, weight="45", note="тренажёр", swap="корпус", role="изоляция"),
-    "планка": dict(kind="num", step=5, weight="40", note="на подход", swap="корпус", role="изоляция", unit="сек"),
 }
 
 
