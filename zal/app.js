@@ -2,6 +2,7 @@
   const KEY = "zal.weights.v1";
   const GEAR_KEY = "zal.gear.v1";
   const SCHEME_KEY = "zal.scheme";
+  const DAY_KEY = "zal.opened.v1";
   const AUTH_KEY = "zal.auth.v1";
   const PASS = "132";
   const API = "weights-api.php";
@@ -51,6 +52,14 @@
   function setDraft(id, value) {
     draft[id] = value;
     updateSaveBar();
+  }
+
+  function paintWeight(id, value, source) {
+    document.querySelectorAll('[data-weight-for="' + CSS.escape(id) + '"]').forEach((input) => {
+      if (input === source) return;
+      input.value = value;
+    });
+    markDirty(id);
   }
 
   function pullWeights() {
@@ -247,6 +256,27 @@
     return ZAL.days.find((day) => day.weekday === weekday) || null;
   }
 
+  function isoToday() {
+    const date = new Date();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return date.getFullYear() + "-" + month + "-" + day;
+  }
+
+  function readOpened() {
+    try {
+      const data = JSON.parse(localStorage.getItem(DAY_KEY) || "null");
+      if (!data || typeof data.date !== "string" || typeof data.id !== "string") return null;
+      return data;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function rememberOpened(id) {
+    localStorage.setItem(DAY_KEY, JSON.stringify({ date: isoToday(), id: id }));
+  }
+
   function href(plan, scheme, tail) {
     return "#/" + plan.id + "/" + scheme + (tail || "");
   }
@@ -276,7 +306,7 @@
   function displayWeight(id) {
     const exercise = ZAL.exercises[id];
     let value = String(getWeight(id));
-    if (unitOf(exercise) === "сек" || unitOf(exercise) === "раз") {
+    if (exercise.kind === "num" || unitOf(exercise) === "сек" || unitOf(exercise) === "раз") {
       const num = parseNum(value);
       if (num != null) value = formatNum(num);
     }
@@ -494,10 +524,7 @@
       const exercise = ZAL.exercises[id];
       const next = bump(getWeight(id), exercise.kind, exercise.step, Number(stepBtn.dataset.step));
       setDraft(id, next);
-      document.querySelectorAll('[data-weight-for="' + CSS.escape(id) + '"]').forEach((input) => {
-        input.value = next;
-      });
-      markDirty(id);
+      paintWeight(id, next);
       if (navigator.vibrate) navigator.vibrate(8);
       return;
     }
@@ -544,7 +571,7 @@
     const input = event.target.closest("[data-weight-for]");
     if (!input || !unlocked()) return;
     setDraft(input.dataset.weightFor, input.value);
-    markDirty(input.dataset.weightFor);
+    paintWeight(input.dataset.weightFor, input.value, input);
   });
 
   app.addEventListener("change", (event) => {
@@ -572,11 +599,23 @@
   });
 
   function bootRoute() {
-    if (!location.hash) {
-      const day = todayDay();
-      if (day) location.replace("#/" + day.id + "/" + chosenScheme());
-      else location.replace("#/home");
+    const opened = readOpened();
+    const route = parseRoute();
+    if (opened && opened.date === isoToday() && planById(opened.id)) {
+      if (!route.plan || route.plan.id !== opened.id) {
+        location.replace("#/" + opened.id + "/" + chosenScheme());
+      }
+      return;
     }
+    const day = todayDay();
+    if (day) {
+      rememberOpened(day.id);
+      if (!route.plan || route.plan.id !== day.id) {
+        location.replace("#/" + day.id + "/" + chosenScheme());
+      }
+      return;
+    }
+    if (route.name !== "home") location.replace("#/home");
   }
 
   function refreshFromServer() {
@@ -586,7 +625,11 @@
     });
   }
 
-  window.addEventListener("hashchange", render);
+  window.addEventListener("hashchange", () => {
+    const route = parseRoute();
+    if (route.plan) rememberOpened(route.plan.id);
+    render();
+  });
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") refreshFromServer();
   });

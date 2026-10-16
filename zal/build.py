@@ -29,7 +29,7 @@ META = {
     "жим-ногами": dict(kind="pair", step=5, weight="85+85", note="на сторону", swap="квадрицепс", role="база"),
     "румынская-тяга": dict(kind="num", step=2.5, weight="40", note="со грифом", swap="бицепс бедра", role="база"),
     "сгибание-ног": dict(kind="pair", step=2, weight="68+68", note="на сторону", swap="бицепс бедра", role="изоляция"),
-    "икры-стоя": dict(kind="pair", step=5, weight="40+40", note="на сторону / тренажёр", swap="икры", role="изоляция", estimate=True),
+    "икры-стоя": dict(kind="num", step=5, weight="40", note="блины на штыре", swap="икры", role="изоляция", estimate=True),
     "икры-сидя": dict(kind="pair", step=5, weight="75+75", note="на сторону", swap="икры", role="изоляция"),
     "жим-от-плеч-рычаг": dict(kind="num", step=5, weight="25", note="рычаг", swap="плечи", role="жим"),
     "жим-арнольда": dict(kind="pair", step=2, weight="14+14", note="на руку", swap="плечи", role="жим", estimate=True),
@@ -39,8 +39,6 @@ META = {
     "бицепс-сидя-одной": dict(kind="num", step=2, weight="14", note="гантель", swap="бицепс", role="изоляция", estimate=True),
     "молотки": dict(kind="pair", step=2, weight="19+19", note="на руку", swap="бицепс", role="изоляция"),
     "разгибания-трицепс-блок": dict(kind="num", step=1, weight="14", note="блок", swap="трицепс", role="изоляция", gears=["канат", "прямая рукоять"]),
-    "скручивания": dict(kind="num", step=1, weight="12", note="на подход, скамья / пол", swap="корпус", role="изоляция", unit="раз"),
-    "пресс-тренажёр": dict(kind="num", step=5, weight="45", note="тренажёр", swap="корпус", role="изоляция"),
 }
 
 
@@ -103,7 +101,7 @@ def main():
             continue
         eid = path.stem
         if eid not in META:
-            raise SystemExit(f"нет META для {eid}")
+            continue
         card = parse_card(path)
         src = CAT / "_img" / Path(card["image"]).name
         if not src.exists():
@@ -146,14 +144,14 @@ def main():
             "short": "Чт",
             "title": "Четверг",
             "kind": "Ноги",
-            "hint": "Квадрицепс, задняя цепь, икры, корпус.",
+            "hint": "Квадрицепс, задняя цепь, икры, трицепс.",
             "A": [
                 {"id": "присед", "sets": "4×8–10"},
                 {"id": "румынская-тяга", "sets": "3×8–10"},
                 {"id": "жим-ногами", "sets": "3×10–12"},
                 {"id": "сгибание-ног", "sets": "3×10–12"},
                 {"id": "икры-сидя", "sets": "3×12–15"},
-                {"id": "скручивания", "sets": "3×12–15"},
+                {"id": "разгибания-трицепс-блок", "sets": "3×10–12"},
             ],
             "B": [
                 {"id": "выпады-в-ходьбе", "sets": "3×10–12 шагов на ногу"},
@@ -161,7 +159,7 @@ def main():
                 {"id": "присед", "sets": "3×10–12"},
                 {"id": "сгибание-ног", "sets": "3×10–12"},
                 {"id": "икры-стоя", "sets": "3×12–15"},
-                {"id": "пресс-тренажёр", "sets": "3×12–15"},
+                {"id": "разгибания-трицепс-блок", "sets": "3×10–12"},
             ],
         },
         {
