@@ -1,4 +1,4 @@
-const CACHE = "zal-13";
+const CACHE = "zal-14";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

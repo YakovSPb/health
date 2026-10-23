@@ -89,24 +89,24 @@
 
   function commitDraft() {
     if (!hasDraft() || syncing) return;
-    const saved = weights();
+    const saved = Object.assign({}, weights());
     const ids = Object.keys(draft);
     ids.forEach((id) => {
       saved[id] = draft[id];
-      delete draft[id];
     });
-    localStorage.setItem(KEY, JSON.stringify(saved));
     syncing = true;
     updateSaveBar();
     pushWeights(saved)
       .then(() => {
+        ids.forEach((id) => delete draft[id]);
+        localStorage.setItem(KEY, JSON.stringify(saved));
         ids.forEach(markStatus);
         if (navigator.vibrate) navigator.vibrate(12);
       })
       .catch(() => {
         ids.forEach((id) => {
           document.querySelectorAll('[data-status-for="' + CSS.escape(id) + '"]').forEach((node) => {
-            node.textContent = "только тут, сервер недоступен";
+            node.textContent = "нет сети — сохранить нельзя";
           });
         });
       })
@@ -202,22 +202,23 @@
     return text.replace(".", ",");
   }
 
+  function emptyWeight(id) {
+    const exercise = ZAL.exercises[id];
+    if (exercise.kind === "pair") return "0+0";
+    return "0";
+  }
+
   function getWeight(id) {
     if (Object.prototype.hasOwnProperty.call(draft, id)) return draft[id];
     const saved = weights();
     if (Object.prototype.hasOwnProperty.call(saved, id)) return saved[id];
-    return ZAL.exercises[id].weight;
-  }
-
-  function isCustom(id) {
-    return Object.prototype.hasOwnProperty.call(draft, id)
-      || Object.prototype.hasOwnProperty.call(weights(), id);
+    return emptyWeight(id);
   }
 
   function weightStatus(id) {
     if (Object.prototype.hasOwnProperty.call(draft, id)) return "не сохранено";
     if (Object.prototype.hasOwnProperty.call(weights(), id)) return "мой вес";
-    return "из трекера";
+    return "не задан";
   }
 
   function bump(value, kind, step, dir) {
@@ -316,12 +317,10 @@
   function stepper(id) {
     const exercise = ZAL.exercises[id];
     const value = displayWeight(id);
-    const custom = isCustom(id);
     const canEdit = unlocked();
     const disabled = canEdit ? "" : " disabled";
     const status = weightStatus(id);
     const unit = unitOf(exercise);
-    const badge = exercise.estimate && !custom ? '<span class="badge" data-estimate-for="' + esc(id) + '">оценка</span>' : '<span data-estimate-for="' + esc(id) + '"></span>';
     const lockNote = canEdit ? "" : " · только просмотр";
     if (exercise.kind === "text") {
       return (
@@ -339,7 +338,7 @@
         '<label class="weight"><input data-weight-for="' + esc(id) + '" value="' + esc(value) + '" inputmode="decimal" autocomplete="off" enterkeyhint="done" aria-label="' + label + '"' + disabled + '><span class="unit">' + esc(unit) + "</span></label>" +
         '<button type="button" class="step" data-step="1" data-id="' + esc(id) + '" aria-label="Прибавить ' + delta + '"' + disabled + '><span class="sign">+</span><span class="delta">' + delta + "</span></button>" +
       "</div>" +
-      '<p class="weight-meta"><span>' + esc(exercise.note) + " " + badge + lockNote + '</span><span data-status-for="' + esc(id) + '">' + esc(status) + "</span></p>"
+      '<p class="weight-meta"><span>' + esc(exercise.note) + lockNote + '</span><span data-status-for="' + esc(id) + '">' + esc(status) + "</span></p>"
     );
   }
 
@@ -347,7 +346,7 @@
     const canEdit = unlocked();
     return (
       '<details class="backup"><summary>Веса и синхронизация</summary>' +
-      "<p>После «Сохранить» веса уходят на сервер и появляются на других устройствах.</p>" +
+      "<p>«Сохранить» пишет на сервер — веса видны на всех устройствах. Без интернета можно смотреть сохранённое, но нельзя сохранять.</p>" +
       (canEdit
         ? '<div class="row"><button type="button" id="export">Скачать веса</button>' +
           '<label class="file">Загрузить<input id="import" type="file" accept="application/json"></label></div>' +
@@ -475,17 +474,11 @@
     document.querySelectorAll('[data-status-for="' + CSS.escape(id) + '"]').forEach((node) => {
       node.textContent = "не сохранено";
     });
-    document.querySelectorAll('[data-estimate-for="' + CSS.escape(id) + '"]').forEach((node) => {
-      node.textContent = "";
-    });
   }
 
   function markStatus(id) {
     document.querySelectorAll('[data-status-for="' + CSS.escape(id) + '"]').forEach((node) => {
       node.textContent = "сохранено";
-    });
-    document.querySelectorAll('[data-estimate-for="' + CSS.escape(id) + '"]').forEach((node) => {
-      node.textContent = "";
     });
   }
 
@@ -584,9 +577,17 @@
       try {
         const data = JSON.parse(String(reader.result));
         if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error("format");
-        localStorage.setItem(KEY, JSON.stringify(data));
-        Object.keys(draft).forEach((id) => delete draft[id]);
-        render();
+        if (msg) msg.textContent = "Загружаю на сервер…";
+        pushWeights(data)
+          .then(() => {
+            localStorage.setItem(KEY, JSON.stringify(data));
+            Object.keys(draft).forEach((id) => delete draft[id]);
+            if (msg) msg.textContent = "Загружено на сервер.";
+            render();
+          })
+          .catch(() => {
+            if (msg) msg.textContent = "Нет сети — загрузить нельзя.";
+          });
       } catch (err) {
         if (msg) msg.textContent = "Файл не подошёл. Нужен json, который скачан отсюда.";
       }
