@@ -1,17 +1,21 @@
 (function () {
   const KEY = "zal.weights.v1";
+  const PLAN_KEY = "zal.plan.v1";
   const GEAR_KEY = "zal.gear.v1";
   const SCHEME_KEY = "zal.scheme";
   const DAY_KEY = "zal.opened.v1";
   const AUTH_KEY = "zal.auth.v1";
   const PASS = "132";
   const API = "weights-api.php";
+  const PLANS_API = "plans-api.php";
   const MONTHS = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
   const app = document.getElementById("app");
   const zoom = document.getElementById("zoom");
   const savebar = document.getElementById("savebar");
   const draft = Object.create(null);
   let syncing = false;
+  let editMode = false;
+  let addOpen = false;
 
   if (!window.ZAL) {
     app.textContent = "Не загрузился data.js";
@@ -142,6 +146,111 @@
     return loadJSON(GEAR_KEY);
   }
 
+  function planOverrides() {
+    return loadJSON(PLAN_KEY);
+  }
+
+  function slotStorageKey(planId, scheme) {
+    return planId + ":" + scheme;
+  }
+
+  function cloneSlots(slots) {
+    return (slots || []).map((slot) => Object.assign({}, slot));
+  }
+
+  function getSlots(plan, scheme) {
+    const key = slotStorageKey(plan.id, scheme);
+    const override = planOverrides()[key];
+    if (Array.isArray(override)) return override;
+    return plan[scheme] || [];
+  }
+
+  function hasPlanOverride(plan, scheme) {
+    return Array.isArray(planOverrides()[slotStorageKey(plan.id, scheme)]);
+  }
+
+  function pushPlans(saved) {
+    return fetch(PLANS_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pass: PASS, plans: saved }),
+    }).then((res) => {
+      if (!res.ok) throw new Error("push-plans");
+      return true;
+    });
+  }
+
+  function pullPlans() {
+    return fetch(PLANS_API, { cache: "no-store" })
+      .then((res) => {
+        if (!res.ok) throw new Error("pull-plans");
+        return res.json();
+      })
+      .then((data) => {
+        if (!data || typeof data !== "object" || Array.isArray(data)) return false;
+        localStorage.setItem(PLAN_KEY, JSON.stringify(data));
+        return true;
+      })
+      .catch(() => false);
+  }
+
+  function writeSlots(plan, scheme, slots) {
+    const all = planOverrides();
+    all[slotStorageKey(plan.id, scheme)] = cloneSlots(slots);
+    localStorage.setItem(PLAN_KEY, JSON.stringify(all));
+    pushPlans(all).catch(() => {});
+  }
+
+  function resetSlots(plan, scheme) {
+    const all = planOverrides();
+    delete all[slotStorageKey(plan.id, scheme)];
+    localStorage.setItem(PLAN_KEY, JSON.stringify(all));
+    pushPlans(all).catch(() => {});
+  }
+
+  function defaultSets(id) {
+    for (let i = 0; i < plans.length; i++) {
+      const plan = plans[i];
+      for (const scheme of ["A", "B"]) {
+        const list = plan[scheme] || [];
+        for (let j = 0; j < list.length; j++) {
+          const slot = list[j];
+          if (slot.id === id) return slot.sets;
+          if (slot.rotate === id) return slot.rotateSets || slot.sets;
+        }
+      }
+    }
+    return "3×8–10";
+  }
+
+  function moveSlot(plan, scheme, index, dir) {
+    const slots = cloneSlots(getSlots(plan, scheme));
+    const next = index + dir;
+    if (next < 0 || next >= slots.length) return false;
+    const tmp = slots[index];
+    slots[index] = slots[next];
+    slots[next] = tmp;
+    writeSlots(plan, scheme, slots);
+    return true;
+  }
+
+  function removeSlot(plan, scheme, index) {
+    const slots = cloneSlots(getSlots(plan, scheme));
+    if (index < 0 || index >= slots.length) return false;
+    slots.splice(index, 1);
+    writeSlots(plan, scheme, slots);
+    return true;
+  }
+
+  function addSlot(plan, scheme, id) {
+    if (!ZAL.exercises[id]) return false;
+    const slots = cloneSlots(getSlots(plan, scheme));
+    if (slots.some((slot) => slot.id === id)) return false;
+    slots.push({ id: id, sets: defaultSets(id) });
+    writeSlots(plan, scheme, slots);
+    return true;
+  }
+
   function planById(id) {
     return plans.find((plan) => plan.id === id) || null;
   }
@@ -238,7 +347,7 @@
     if (!plan) return { name: "home" };
     if (parts[2] === "s") {
       const index = Number(parts[3]);
-      const raw = plan[scheme][index];
+      const raw = getSlots(plan, scheme)[index];
       if (!raw) return { name: "list", plan, scheme };
       const slot = resolveSlot(raw);
       return { name: "detail", plan, scheme, exercise: ZAL.exercises[slot.id], id: slot.id, slot, back: "#/" + plan.id + "/" + scheme };
@@ -372,25 +481,103 @@
       backup();
   }
 
+  function addPickerHtml(plan, scheme) {
+    const used = new Set(getSlots(plan, scheme).map((slot) => slot.id));
+    const ids = Object.keys(ZAL.exercises)
+      .filter((id) => !used.has(id))
+      .sort((a, b) => {
+        const left = ZAL.exercises[a];
+        const right = ZAL.exercises[b];
+        const bySwap = String(left.swap || "").localeCompare(String(right.swap || ""), "ru");
+        if (bySwap) return bySwap;
+        return left.title.localeCompare(right.title, "ru");
+      });
+    if (!ids.length) {
+      return '<section class="add-picker"><p class="empty">Все упражнения из каталога уже в списке.</p></section>';
+    }
+    const rows = ids.map((id) => {
+      const item = ZAL.exercises[id];
+      return (
+        '<button type="button" class="sub add-item" data-add-id="' + esc(id) + '">' +
+          '<img alt="" src="' + esc(item.image) + '">' +
+          "<div><strong>" + esc(item.title) + "</strong><span>" + esc(item.swap || "") + " · " + esc(defaultSets(id)) + "</span></div>" +
+        "</button>"
+      );
+    }).join("");
+    return (
+      '<section class="add-picker">' +
+        "<h3>Добавить упражнение</h3>" +
+        '<button type="button" class="plan-btn" data-add-close>Закрыть</button>' +
+        rows +
+      "</section>"
+    );
+  }
+
+  function planEditBar(plan, scheme) {
+    if (!unlocked()) {
+      return '<p class="hint">Чтобы менять порядок списка — введи пароль сверху.</p>';
+    }
+    if (!editMode) {
+      return (
+        '<div class="plan-bar">' +
+          '<button type="button" class="plan-btn" data-edit-on>Изменить список</button>' +
+          (hasPlanOverride(plan, scheme)
+            ? '<button type="button" class="plan-btn ghost" data-plan-reset>Сбросить к плану</button>'
+            : "") +
+        "</div>"
+      );
+    }
+    return (
+      '<div class="plan-bar">' +
+        '<button type="button" class="plan-btn on" data-edit-off>Готово</button>' +
+        '<button type="button" class="plan-btn" data-add-open>Добавить</button>' +
+        (hasPlanOverride(plan, scheme)
+          ? '<button type="button" class="plan-btn ghost" data-plan-reset>Сбросить к плану</button>'
+          : "") +
+      "</div>"
+    );
+  }
+
   function renderList(plan, scheme) {
     const block = blockInfo(new Date());
     const mismatch = scheme !== block.scheme
       ? " Открыт вариант " + scheme + ", в блоке до " + fmt(block.to) + " — " + block.scheme + "."
       : "";
-    const rows = plan[scheme].map((slot, index) => {
+    const slots = getSlots(plan, scheme);
+    const rows = slots.map((slot, index) => {
       const shown = resolveSlot(slot);
       const exercise = ZAL.exercises[shown.id];
+      if (!exercise) {
+        return (
+          '<article class="ex">' +
+            "<p class=\"empty\">Нет карточки: " + esc(shown.id) + "</p>" +
+            (editMode
+              ? '<div class="ex-tools"><button type="button" data-remove="' + index + '">Удалить</button></div>'
+              : "") +
+          "</article>"
+        );
+      }
       const open = href(plan, scheme, "/s/" + index);
       const cue = shown.cue ? '<p class="cue">' + esc(shown.cue) + "</p>" : "";
+      const tools = editMode
+        ? (
+          '<div class="ex-tools" data-stop>' +
+            '<button type="button" data-move="-1" data-index="' + index + '" aria-label="Выше"' + (index === 0 ? " disabled" : "") + ">↑</button>" +
+            '<button type="button" data-move="1" data-index="' + index + '" aria-label="Ниже"' + (index === slots.length - 1 ? " disabled" : "") + ">↓</button>" +
+            '<button type="button" data-remove="' + index + '">Удалить</button>' +
+          "</div>"
+        )
+        : "";
       return (
         '<article class="ex">' +
+          tools +
           '<a class="ex-open" href="' + open + '">' +
             '<img class="thumb" alt="" src="' + esc(exercise.image) + '">' +
             "<div><h2>" + (index + 1) + ". " + esc(exercise.title) + "</h2>" +
             '<p class="sets">' + esc(shown.sets) + "</p>" + cue +
             "</div>" +
           "</a>" +
-          stepper(shown.id) +
+          (editMode ? "" : stepper(shown.id)) +
         "</article>"
       );
     }).join("");
@@ -403,7 +590,10 @@
       '<button type="button" data-scheme="A" class="' + (scheme === "A" ? "on" : "") + '">A</button>' +
       '<button type="button" data-scheme="B" class="' + (scheme === "B" ? "on" : "") + '">B</button>' +
       "</div></div>" +
-      '<p class="hint">' + esc(plan.kind) + ". " + esc(plan.hint) + mismatch + "</p></header>" +
+      '<p class="hint">' + esc(plan.kind) + ". " + esc(plan.hint) + mismatch + "</p>" +
+      planEditBar(plan, scheme) +
+      "</header>" +
+      (addOpen && editMode ? addPickerHtml(plan, scheme) : "") +
       rows + backup();
   }
 
@@ -426,7 +616,7 @@
         if (left !== right) return left - right;
         return ZAL.exercises[a].title.localeCompare(ZAL.exercises[b].title, "ru");
       });
-    const inPlan = new Set(route.plan[route.scheme].map((slot) => slot.id));
+    const inPlan = new Set(getSlots(route.plan, route.scheme).map((slot) => slot.id));
     const subHtml = subs.length
       ? subs.map((id) => {
           const item = ZAL.exercises[id];
@@ -521,6 +711,76 @@
       if (navigator.vibrate) navigator.vibrate(8);
       return;
     }
+    if (event.target.closest("[data-edit-on]")) {
+      if (!unlocked()) return;
+      editMode = true;
+      addOpen = false;
+      render();
+      return;
+    }
+    if (event.target.closest("[data-edit-off]")) {
+      editMode = false;
+      addOpen = false;
+      render();
+      return;
+    }
+    if (event.target.closest("[data-add-open]")) {
+      addOpen = true;
+      render();
+      window.scrollTo(0, 0);
+      return;
+    }
+    if (event.target.closest("[data-add-close]")) {
+      addOpen = false;
+      render();
+      return;
+    }
+    const addBtn = event.target.closest("[data-add-id]");
+    if (addBtn) {
+      const route = parseRoute();
+      if (!route.plan || !unlocked()) return;
+      if (addSlot(route.plan, route.scheme, addBtn.dataset.addId)) {
+        addOpen = false;
+        if (navigator.vibrate) navigator.vibrate(10);
+        render();
+      }
+      return;
+    }
+    const moveBtn = event.target.closest("[data-move]");
+    if (moveBtn) {
+      const route = parseRoute();
+      if (!route.plan || !unlocked()) return;
+      if (moveSlot(route.plan, route.scheme, Number(moveBtn.dataset.index), Number(moveBtn.dataset.move))) {
+        if (navigator.vibrate) navigator.vibrate(8);
+        render();
+      }
+      return;
+    }
+    const removeBtn = event.target.closest("[data-remove]");
+    if (removeBtn) {
+      const route = parseRoute();
+      if (!route.plan || !unlocked()) return;
+      const slots = getSlots(route.plan, route.scheme);
+      const index = Number(removeBtn.dataset.remove);
+      const raw = slots[index];
+      const title = raw && ZAL.exercises[raw.id] ? ZAL.exercises[raw.id].title : (raw && raw.id) || "";
+      if (!window.confirm("Убрать из тренировки: " + title + "?")) return;
+      if (removeSlot(route.plan, route.scheme, index)) {
+        if (navigator.vibrate) navigator.vibrate(10);
+        render();
+      }
+      return;
+    }
+    if (event.target.closest("[data-plan-reset]")) {
+      const route = parseRoute();
+      if (!route.plan || !unlocked()) return;
+      if (!window.confirm("Вернуть исходный список упражнений для варианта " + route.scheme + "?")) return;
+      resetSlots(route.plan, route.scheme);
+      addOpen = false;
+      if (navigator.vibrate) navigator.vibrate(10);
+      render();
+      return;
+    }
     const gearBtn = event.target.closest("[data-gear]");
     if (gearBtn) {
       const saved = gears();
@@ -535,6 +795,7 @@
     if (schemeBtn) {
       localStorage.setItem(SCHEME_KEY, schemeBtn.dataset.scheme);
       const route = parseRoute();
+      addOpen = false;
       location.hash = href(route.plan, schemeBtn.dataset.scheme);
       return;
     }
@@ -620,9 +881,9 @@
   }
 
   function refreshFromServer() {
-    if (hasDraft() || syncing) return Promise.resolve();
-    return pullWeights().then((ok) => {
-      if (ok) render();
+    if (hasDraft() || syncing || editMode) return Promise.resolve();
+    return Promise.all([pullWeights(), pullPlans()]).then((results) => {
+      if (results.some(Boolean)) render();
     });
   }
 
@@ -636,7 +897,7 @@
   });
   window.addEventListener("focus", refreshFromServer);
 
-  pullWeights().finally(() => {
+  Promise.all([pullWeights(), pullPlans()]).finally(() => {
     bootRoute();
     render();
   });

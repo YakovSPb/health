@@ -471,6 +471,78 @@ body.has-savebar #app {
   background: #fff;
 }
 
+.plan-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.plan-btn {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 10px 14px;
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+.plan-btn.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+.plan-btn.ghost {
+  color: var(--muted);
+}
+
+.ex-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.ex-tools button {
+  border: 1px solid var(--line);
+  background: var(--card-2);
+  color: var(--ink);
+  border-radius: 12px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 8px 12px;
+}
+
+.ex-tools button:disabled {
+  opacity: 0.35;
+}
+
+.add-picker {
+  background: var(--card);
+  border-radius: 18px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.add-picker h3 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+
+.add-picker .plan-btn {
+  margin-bottom: 10px;
+}
+
+button.sub.add-item {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  cursor: pointer;
+}
+
 :focus-visible {
   outline: 2px solid var(--ok);
   outline-offset: 2px;

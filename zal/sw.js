@@ -1,4 +1,4 @@
-const CACHE = "zal-14";
+const CACHE = "zal-15";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -26,7 +26,7 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   const url = new URL(event.request.url);
-  if (url.pathname.endsWith("weights-api.php")) {
+  if (url.pathname.endsWith("weights-api.php") || url.pathname.endsWith("plans-api.php")) {
     event.respondWith(fetch(event.request));
     return;
   }
