@@ -439,8 +439,17 @@
         '<p class="weight-meta"><span>' + esc(exercise.note) + lockNote + '</span><span data-status-for="' + esc(id) + '">' + esc(status) + "</span></p>"
       );
     }
+    // Повторы: только поле ввода, без −/+ и без «кг/рычаг».
+    if (unit === "раз") {
+      return (
+        '<div class="stepper text' + (canEdit ? "" : " locked") + '" data-stop>' +
+          '<label class="weight"><input data-weight-for="' + esc(id) + '" value="' + esc(value) + '" inputmode="numeric" autocomplete="off" enterkeyhint="done" aria-label="Повторы"' + disabled + '><span class="unit">раз</span></label>' +
+        "</div>" +
+        '<p class="weight-meta"><span>' + esc(exercise.note) + lockNote + '</span><span data-status-for="' + esc(id) + '">' + esc(status) + "</span></p>"
+      );
+    }
     const delta = stepLabel(exercise.step);
-    const label = unit === "сек" ? "Секунды" : unit === "раз" ? "Повторы" : "Вес";
+    const label = unit === "сек" ? "Секунды" : "Вес";
     return (
       '<div class="stepper' + (canEdit ? "" : " locked") + '" data-stop>' +
         '<button type="button" class="step" data-step="-1" data-id="' + esc(id) + '" aria-label="Убавить ' + delta + '"' + disabled + '><span class="sign">−</span><span class="delta">' + delta + "</span></button>" +
