@@ -312,6 +312,19 @@
     return Math.max(1, round0(targetKcal / per));
   }
 
+  function gramsOfProductInDay(productId, exceptUid) {
+    const day = getDay(currentIso());
+    let found = null;
+    F.meals.forEach((meal) => {
+      (day[meal.id] || []).forEach((row) => {
+        if (row.productId === productId && row.uid !== exceptUid && found == null) {
+          found = Number(row.grams) || 0;
+        }
+      });
+    });
+    return found;
+  }
+
   function grainAddonIds() {
     const map = F.grainAddons || {};
     return Object.keys(map).map((grainId) => map[grainId].productId);
@@ -362,6 +375,9 @@
           next = round0((grams / from.defaultGrams) * p.defaultGrams);
         } else if (from.dry && p.dry) {
           next = round0(grams);
+        } else if (from.category === "salad" || from.category === "fruit" || from.category === "topping") {
+          // у каждого типа своя порция; если продукт уже есть в дне — те же граммы
+          next = gramsOfProductInDay(p.id) || p.defaultGrams || round0(grams);
         } else if (from.unit === "pcs" && p.unit === "pcs") {
           next = round0(grams);
         } else {
@@ -732,11 +748,22 @@
   function updateRowGrams(uid, grams) {
     const iso = currentIso();
     const day = getDay(iso);
+    let productId = null;
     F.meals.forEach((meal) => {
       (day[meal.id] || []).forEach((row) => {
-        if (row.uid === uid) row.grams = grams;
+        if (row.uid === uid) {
+          row.grams = grams;
+          productId = row.productId;
+        }
       });
     });
+    if (productId) {
+      F.meals.forEach((meal) => {
+        (day[meal.id] || []).forEach((row) => {
+          if (row.productId === productId) row.grams = grams;
+        });
+      });
+    }
     setDay(iso, day);
     render();
   }
@@ -757,10 +784,11 @@
     const iso = currentIso();
     const day = getDay(iso);
     if (!day[mealId]) day[mealId] = [];
+    const existing = gramsOfProductInDay(productId);
     day[mealId].push({
       uid: uid(),
       productId: productId,
-      grams: p.defaultGrams,
+      grams: existing != null ? existing : p.defaultGrams,
     });
     if (p.category === "grain") syncGrainAddon(day, mealId);
     setDay(iso, day);

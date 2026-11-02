@@ -1,5 +1,5 @@
 window.FOOD = {
-  templateVersion: 4,
+  templateVersion: 7,
   targetKcal: 2000,
   targetProtein: 180,
   maintenanceKcal: 2900,
@@ -229,7 +229,7 @@ window.FOOD = {
       protein: 1,
       fat: 0.2,
       carbs: 6,
-      defaultGrams: 150,
+      defaultGrams: 100,
     },
     cucumber_tomato: {
       id: "cucumber_tomato",
@@ -239,7 +239,7 @@ window.FOOD = {
       protein: 0.9,
       fat: 0.2,
       carbs: 3.5,
-      defaultGrams: 150,
+      defaultGrams: 200,
     },
     apple: {
       id: "apple",
@@ -482,7 +482,7 @@ window.FOOD = {
       { productId: "chicken", grams: 140 },
       { productId: "pasta", grams: 60 },
       { productId: "cheese_grated", grams: 20 },
-      { productId: "cucumber_tomato", grams: 150 },
+      { productId: "cucumber_tomato", grams: 200 },
       { productId: "apple", grams: 100 },
     ],
     dinner: [
