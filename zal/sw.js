@@ -1,9 +1,20 @@
-const CACHE = "zal-15";
+const CACHE = "food-12";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE).then((cache) =>
-      cache.addAll(["./", "./index.html", "./app.css", "./app.js", "./data.js", "./manifest.json"])
+      cache.addAll([
+        "./",
+        "./index.html",
+        "./zal.html",
+        "./app.css?v=12",
+        "./food.css?v=12",
+        "./food-data.js?v=12",
+        "./food-app.js?v=12",
+        "./app.js",
+        "./data.js",
+        "./manifest.json",
+      ])
     )
   );
   self.skipWaiting();
@@ -26,7 +37,11 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   const url = new URL(event.request.url);
-  if (url.pathname.endsWith("weights-api.php") || url.pathname.endsWith("plans-api.php")) {
+  if (
+    url.pathname.endsWith("weights-api.php") ||
+    url.pathname.endsWith("plans-api.php") ||
+    url.pathname.endsWith("food-api.php")
+  ) {
     event.respondWith(fetch(event.request));
     return;
   }

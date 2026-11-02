@@ -87,6 +87,16 @@ jobs:
                 fastcgi_pass unix:${PHP_SOCK};
                 add_header Cache-Control "no-store" always;
             }
+            location = /plans-api.php {
+                include snippets/fastcgi-php.conf;
+                fastcgi_pass unix:${PHP_SOCK};
+                add_header Cache-Control "no-store" always;
+            }
+            location = /food-api.php {
+                include snippets/fastcgi-php.conf;
+                fastcgi_pass unix:${PHP_SOCK};
+                add_header Cache-Control "no-store" always;
+            }
             EOF
             # убрать случайный отступ YAML/скрипта в snippet
             sed -i 's/^[[:space:]]*//' /etc/nginx/snippets/zal-weights-api.conf

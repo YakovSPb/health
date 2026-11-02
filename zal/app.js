@@ -483,7 +483,7 @@
       '<a href="' + href(day, chosenScheme()) + '"><strong>' + esc(day.title) + "</strong><span>" + esc(day.kind) + "</span></a>"
     ).join("");
     app.innerHTML =
-      '<header class="top"><div class="brand"><h1>Зал</h1></div></header>' +
+      '<header class="top"><div class="brand"><h1>Зал</h1><a class="food-zal-link" href="./">Питание</a></div></header>' +
       lockBar() +
       '<p class="hint">' + esc(note) + "</p>" +
       '<div class="home-list">' + cards + focus + "</div>" +
@@ -591,7 +591,7 @@
       );
     }).join("");
     app.innerHTML =
-      '<header class="top"><div class="brand"><h1>Зал</h1><p>блок до ' + esc(fmt(block.to)) + "</p></div>" +
+      '<header class="top"><div class="brand"><div><h1>Зал</h1><p>блок до ' + esc(fmt(block.to)) + '</p></div><a class="food-zal-link" href="./">Питание</a></div></header>' +
       lockBar() +
       chips(plan, scheme) +
       '<div class="dayline"><h2>' + esc(plan.title) + "</h2>" +

@@ -1,6 +1,6 @@
 {
-  "name": "Зал",
-  "short_name": "Зал",
+  "name": "Питание",
+  "short_name": "Питание",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#10110e",
