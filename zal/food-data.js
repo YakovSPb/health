@@ -1,5 +1,5 @@
 window.FOOD = {
-  templateVersion: 7,
+  templateVersion: 8,
   targetKcal: 2000,
   targetProtein: 180,
   maintenanceKcal: 2900,
@@ -14,7 +14,7 @@ window.FOOD = {
     { id: "nuts", title: "Орехи" },
     { id: "drink", title: "Кофе" },
     { id: "oil", title: "Масло" },
-    { id: "topping", title: "Добавка к крупе" },
+    { id: "topping", title: "Добавка" },
     { id: "treat", title: "Вкусняшка" },
   ],
 
@@ -85,6 +85,17 @@ window.FOOD = {
       carbs: 1.8,
       defaultGrams: 270,
       swapGroup: "protein",
+    },
+    yogurt2: {
+      id: "yogurt2",
+      title: "Йогурт 2%",
+      category: "topping",
+      kcal: 60,
+      protein: 4.5,
+      fat: 2,
+      carbs: 5,
+      defaultGrams: 100,
+      note: "к творогу",
     },
     oats: {
       id: "oats",
@@ -463,10 +474,14 @@ window.FOOD = {
     cottage5: 150,
   },
 
-  /** Добавка к гарниру: макароны → сыр, киноа → томатная паста. */
+  /** Связанные добавки: макароны→сыр, киноа→томатная паста, творог→йогурт. */
   grainAddons: {
     pasta: { productId: "cheese_grated", grams: 20 },
     quinoa: { productId: "tomato_paste", grams: 30 },
+  },
+  proteinAddons: {
+    cottage1: { productId: "yogurt2", grams: 100 },
+    cottage5: { productId: "yogurt2", grams: 100 },
   },
 
   defaultDay: {
@@ -487,6 +502,7 @@ window.FOOD = {
     ],
     dinner: [
       { productId: "cottage1", grams: 300 },
+      { productId: "yogurt2", grams: 100 },
       { productId: "quinoa", grams: 50 },
       { productId: "tomato_paste", grams: 30 },
       { productId: "cabbage_sauerkraut", grams: 150 },

@@ -1,4 +1,4 @@
-const CACHE = "food-16";
+const CACHE = "food-17";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -7,10 +7,10 @@ self.addEventListener("install", (event) => {
         "./",
         "./index.html",
         "./zal.html",
-        "./app.css?v=16",
-        "./food.css?v=16",
-        "./food-data.js?v=16",
-        "./food-app.js?v=16",
+        "./app.css?v=17",
+        "./food.css?v=17",
+        "./food-data.js?v=17",
+        "./food-app.js?v=17",
         "./app.js",
         "./data.js",
         "./manifest.json",

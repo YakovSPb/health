@@ -325,31 +325,47 @@
     return found;
   }
 
-  function grainAddonIds() {
-    const map = F.grainAddons || {};
-    return Object.keys(map).map((grainId) => map[grainId].productId);
+  function linkedAddonMaps() {
+    return [F.grainAddons || {}, F.proteinAddons || {}];
   }
 
-  function syncGrainAddon(day, mealId) {
+  function linkedAddonIds() {
+    const ids = [];
+    linkedAddonMaps().forEach((map) => {
+      Object.keys(map).forEach((key) => {
+        const id = map[key].productId;
+        if (ids.indexOf(id) === -1) ids.push(id);
+      });
+    });
+    return ids;
+  }
+
+  function linkedAddonFor(productId) {
+    let found = null;
+    linkedAddonMaps().forEach((map) => {
+      if (map[productId]) found = map[productId];
+    });
+    return found;
+  }
+
+  function syncLinkedAddons(day, mealId) {
     const rows = day[mealId] || [];
-    const addonIds = grainAddonIds();
-    const grainRow = rows.find((row) => {
-      const p = productOf(row.productId);
-      return p && p.category === "grain" && F.grainAddons && F.grainAddons[row.productId];
-    });
+    const addonIds = linkedAddonIds();
+    const triggers = rows.filter((row) => linkedAddonFor(row.productId));
     const withoutAddons = rows.filter((row) => addonIds.indexOf(row.productId) === -1);
-    if (!grainRow) {
-      day[mealId] = withoutAddons;
-      return;
-    }
-    const addon = F.grainAddons[grainRow.productId];
-    const grainIndex = withoutAddons.findIndex((row) => row.uid === grainRow.uid);
     const next = withoutAddons.slice();
-    next.splice(grainIndex + 1, 0, {
-      uid: uid(),
-      productId: addon.productId,
-      grams: addon.grams,
-    });
+    // вставляем добавки сразу после своего продукта (с конца, чтобы индексы не плыли)
+    for (let i = triggers.length - 1; i >= 0; i--) {
+      const trigger = triggers[i];
+      const addon = linkedAddonFor(trigger.productId);
+      const idx = next.findIndex((row) => row.uid === trigger.uid);
+      if (idx === -1) continue;
+      next.splice(idx + 1, 0, {
+        uid: uid(),
+        productId: addon.productId,
+        grams: gramsOfProductInDay(addon.productId) || addon.grams,
+      });
+    }
     day[mealId] = next;
   }
 
@@ -790,7 +806,7 @@
       productId: productId,
       grams: existing != null ? existing : p.defaultGrams,
     });
-    if (p.category === "grain") syncGrainAddon(day, mealId);
+    if (p.category === "grain" || linkedAddonFor(productId)) syncLinkedAddons(day, mealId);
     setDay(iso, day);
     pickerMealId = null;
     pickerCategory = null;
@@ -878,8 +894,12 @@
           row.grams = grams;
         }
       });
-      if ((fromProduct && fromProduct.category === "grain") || (productOf(toId) && productOf(toId).category === "grain")) {
-        syncGrainAddon(day, mealId);
+      if (
+        (fromProduct && (fromProduct.category === "grain" || linkedAddonFor(fromProduct.id))) ||
+        linkedAddonFor(toId) ||
+        (productOf(toId) && productOf(toId).category === "grain")
+      ) {
+        syncLinkedAddons(day, mealId);
       }
       setDay(iso, day);
       swapUid = null;
