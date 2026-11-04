@@ -1,5 +1,5 @@
 window.FOOD = {
-  templateVersion: 9,
+  templateVersion: 10,
   targetKcal: 2000,
   targetProtein: 180,
   maintenanceKcal: 2900,
@@ -168,6 +168,18 @@ window.FOOD = {
       defaultGrams: 60,
       dry: true,
       cookMul: 2.5,
+    },
+    wheat: {
+      id: "wheat",
+      title: "Каша пшеничная",
+      category: "grain",
+      kcal: 340,
+      protein: 12,
+      fat: 1.5,
+      carbs: 70,
+      defaultGrams: 50,
+      dry: true,
+      cookMul: 3,
     },
     bread: {
       id: "bread",
