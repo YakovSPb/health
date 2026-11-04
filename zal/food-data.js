@@ -1,5 +1,5 @@
 window.FOOD = {
-  templateVersion: 8,
+  templateVersion: 9,
   targetKcal: 2000,
   targetProtein: 180,
   maintenanceKcal: 2900,
@@ -176,6 +176,16 @@ window.FOOD = {
       kcal: 250,
       protein: 8,
       fat: 3,
+      carbs: 48,
+      defaultGrams: 70,
+    },
+    wholegrain_bread: {
+      id: "wholegrain_bread",
+      title: "Цельнозерновой хлеб",
+      category: "grain",
+      kcal: 270,
+      protein: 10,
+      fat: 4,
       carbs: 48,
       defaultGrams: 70,
     },

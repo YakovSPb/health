@@ -1,5 +1,6 @@
 (function () {
   const KEY = "food.diary.v3";
+  const UI_KEY = "food.ui.v1";
   const API = "food-api.php";
   const PASS = "132";
   const MONTHS = [
@@ -68,15 +69,27 @@
     return "i" + Math.random().toString(36).slice(2, 10);
   }
 
+  function cloneMealTemplate(mealId) {
+    const rows = F.defaultDay[mealId] || [];
+    return rows.map((row) => ({
+      uid: uid(),
+      productId: row.productId,
+      grams: row.grams,
+    }));
+  }
+
   function cloneDefaultDay() {
     const day = {};
     F.meals.forEach((meal) => {
-      const rows = F.defaultDay[meal.id] || [];
-      day[meal.id] = rows.map((row) => ({
-        uid: uid(),
-        productId: row.productId,
-        grams: row.grams,
-      }));
+      day[meal.id] = cloneMealTemplate(meal.id);
+    });
+    return day;
+  }
+
+  function emptyDay() {
+    const day = {};
+    F.meals.forEach((meal) => {
+      day[meal.id] = [];
     });
     return day;
   }
@@ -87,6 +100,49 @@
 
   function templateVersion() {
     return F.templateVersion || 1;
+  }
+
+  function loadUi() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(UI_KEY) || "null");
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) return { collapsed: {} };
+      const collapsed =
+        raw.collapsed && typeof raw.collapsed === "object" && !Array.isArray(raw.collapsed)
+          ? raw.collapsed
+          : {};
+      return { collapsed: collapsed };
+    } catch (e) {
+      return { collapsed: {} };
+    }
+  }
+
+  function saveUi(ui) {
+    localStorage.setItem(UI_KEY, JSON.stringify(ui));
+  }
+
+  function mealCollapsed(iso, mealId) {
+    const dayMap = loadUi().collapsed[iso];
+    return !!(dayMap && dayMap[mealId]);
+  }
+
+  function setMealCollapsed(iso, mealId, collapsed) {
+    const ui = loadUi();
+    if (!ui.collapsed[iso]) ui.collapsed[iso] = {};
+    if (collapsed) ui.collapsed[iso][mealId] = true;
+    else delete ui.collapsed[iso][mealId];
+    saveUi(ui);
+  }
+
+  /** Начал заполнять приём — предыдущие сворачиваются, текущий раскрывается. */
+  function activateMeal(iso, mealId) {
+    const order = F.meals.map((meal) => meal.id);
+    const idx = order.indexOf(mealId);
+    if (idx < 0) return;
+    const ui = loadUi();
+    if (!ui.collapsed[iso]) ui.collapsed[iso] = {};
+    for (let i = 0; i < idx; i++) ui.collapsed[iso][order[i]] = true;
+    delete ui.collapsed[iso][mealId];
+    saveUi(ui);
   }
 
   function normalizeFood(raw) {
@@ -140,11 +196,11 @@
     const today = isoToday();
     let changed = false;
     if (food.v !== templateVersion()) {
-      food.days[today] = cloneDefaultDay();
+      if (!food.days[today]) food.days[today] = emptyDay();
       food.v = templateVersion();
       changed = true;
     } else if (!food.days[today]) {
-      food.days[today] = cloneDefaultDay();
+      food.days[today] = emptyDay();
       changed = true;
     }
     Object.keys(food.days).forEach((iso) => {
@@ -160,7 +216,7 @@
       queuePush();
     }
     if (!food.days[iso]) {
-      food.days[iso] = cloneDefaultDay();
+      food.days[iso] = emptyDay();
       saveFoodLocal(food);
       queuePush();
     }
@@ -522,8 +578,10 @@
     );
   }
 
-  function renderMeal(meal, day) {
+  function renderMeal(meal, day, iso) {
     const rows = day[meal.id] || [];
+    const collapsed = mealCollapsed(iso, meal.id);
+    const hasTemplate = (F.defaultDay[meal.id] || []).length > 0;
     const sub = rows.reduce(
       (acc, row) => {
         const m = macrosOf(row.productId, Number(row.grams) || 0);
@@ -534,13 +592,19 @@
       { kcal: 0, protein: 0 }
     );
     return (
-      '<section class="food-meal" data-meal-block="' +
+      '<section class="food-meal' +
+      (collapsed ? " is-collapsed" : "") +
+      '" data-meal-block="' +
       esc(meal.id) +
       '">' +
-      '<div class="food-meal-head">' +
+      '<button type="button" class="food-meal-head" data-toggle-meal="' +
+      esc(meal.id) +
+      '" aria-expanded="' +
+      (collapsed ? "false" : "true") +
+      '">' +
       "<div><h2>" +
       esc(meal.title) +
-      "</h2>" +
+      '<span class="food-meal-chevron" aria-hidden="true"></span></h2>' +
       (meal.time ? '<p class="meta">' + esc(meal.time) + "</p>" : "") +
       "</div>" +
       '<p class="food-meal-sum">' +
@@ -548,16 +612,23 @@
       " ккал · " +
       round1(sub.protein) +
       " г</p>" +
-      "</div>" +
+      "</button>" +
+      '<div class="food-meal-body">' +
       '<ul class="food-list">' +
       rows.map((row) => renderRow(meal.id, row)).join("") +
       "</ul>" +
+      (hasTemplate
+        ? '<button type="button" class="food-add-template" data-template="' +
+          esc(meal.id) +
+          '">добавить шаблон</button>'
+        : "") +
       '<button type="button" class="food-add" data-add="' +
       esc(meal.id) +
       '">+ продукт</button>' +
       '<button type="button" class="food-add-kcal" data-add-kcal="' +
       esc(meal.id) +
       '">+ свободные ккал</button>' +
+      "</div>" +
       "</section>"
     );
   }
@@ -752,7 +823,7 @@
       "</div>" +
       "</header>" +
       '<main class="food-main">' +
-      F.meals.map((meal) => renderMeal(meal, day)).join("") +
+      F.meals.map((meal) => renderMeal(meal, day, iso)).join("") +
       "</main>" +
       renderFooter(totals) +
       renderPicker(day) +
@@ -761,10 +832,21 @@
     document.body.classList.toggle("has-food-footer", true);
   }
 
+  function mealIdOfRow(day, uid) {
+    let found = null;
+    F.meals.forEach((meal) => {
+      (day[meal.id] || []).forEach((row) => {
+        if (row.uid === uid) found = meal.id;
+      });
+    });
+    return found;
+  }
+
   function updateRowGrams(uid, grams) {
     const iso = currentIso();
     const day = getDay(iso);
     let productId = null;
+    const mealId = mealIdOfRow(day, uid);
     F.meals.forEach((meal) => {
       (day[meal.id] || []).forEach((row) => {
         if (row.uid === uid) {
@@ -780,6 +862,7 @@
         });
       });
     }
+    if (mealId) activateMeal(iso, mealId);
     setDay(iso, day);
     render();
   }
@@ -807,9 +890,24 @@
       grams: existing != null ? existing : p.defaultGrams,
     });
     if (p.category === "grain" || linkedAddonFor(productId)) syncLinkedAddons(day, mealId);
+    activateMeal(iso, mealId);
     setDay(iso, day);
     pickerMealId = null;
     pickerCategory = null;
+    render();
+  }
+
+  function applyMealTemplate(mealId) {
+    if (!(F.defaultDay[mealId] || []).length) return;
+    const iso = currentIso();
+    const day = getDay(iso);
+    const existing = day[mealId] || [];
+    if (existing.length && !window.confirm("Заменить «" + (F.meals.find((m) => m.id === mealId) || {}).title + "» шаблоном?")) {
+      return;
+    }
+    day[mealId] = cloneMealTemplate(mealId);
+    activateMeal(iso, mealId);
+    setDay(iso, day);
     render();
   }
 
@@ -827,7 +925,7 @@
     }
 
     const t = event.target.closest(
-      "[data-shift], [data-today], [data-reset], [data-add], [data-add-kcal], [data-remove], [data-swap], [data-cat], [data-pick], [data-swap-to]"
+      "[data-shift], [data-today], [data-reset], [data-toggle-meal], [data-template], [data-add], [data-add-kcal], [data-remove], [data-swap], [data-cat], [data-pick], [data-swap-to]"
     );
     if (!t) return;
 
@@ -845,6 +943,17 @@
       render();
       return;
     }
+    if (t.hasAttribute("data-toggle-meal")) {
+      const mealId = t.getAttribute("data-toggle-meal");
+      const iso = currentIso();
+      setMealCollapsed(iso, mealId, !mealCollapsed(iso, mealId));
+      render();
+      return;
+    }
+    if (t.hasAttribute("data-template")) {
+      applyMealTemplate(t.getAttribute("data-template"));
+      return;
+    }
     if (t.hasAttribute("data-add-kcal")) {
       addProduct(t.getAttribute("data-add-kcal"), "free_kcal");
       return;
@@ -853,6 +962,7 @@
       pickerMealId = t.getAttribute("data-add");
       pickerCategory = null;
       swapUid = null;
+      activateMeal(currentIso(), pickerMealId);
       render();
       return;
     }
@@ -901,6 +1011,7 @@
       ) {
         syncLinkedAddons(day, mealId);
       }
+      activateMeal(iso, mealId);
       setDay(iso, day);
       swapUid = null;
       render();
