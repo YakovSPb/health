@@ -274,6 +274,17 @@ window.FOOD = {
       carbs: 3.5,
       defaultGrams: 200,
     },
+    greek_salad: {
+      id: "greek_salad",
+      title: "Греческий салат",
+      category: "salad",
+      kcal: 120,
+      protein: 5,
+      fat: 10,
+      carbs: 4,
+      defaultGrams: 200,
+      note: "с фетой и маслом",
+    },
     apple: {
       id: "apple",
       title: "Яблоко",

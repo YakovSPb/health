@@ -95,11 +95,108 @@
   }
 
   function emptyFood() {
-    return { v: templateVersion(), days: {} };
+    return { v: 1, days: {} };
   }
 
-  function templateVersion() {
-    return F.templateVersion || 1;
+  function rowsScore(rows) {
+    if (!Array.isArray(rows) || !rows.length) return 0;
+    return rows.reduce((sum, row) => sum + 1 + Math.abs(Number(row.grams) || 0), 0);
+  }
+
+  function preferRows(a, b) {
+    const left = Array.isArray(a) ? a : [];
+    const right = Array.isArray(b) ? b : [];
+    if (!left.length) return right.slice();
+    if (!right.length) return left.slice();
+    return rowsScore(left) >= rowsScore(right) ? left.slice() : right.slice();
+  }
+
+  function dayUpdatedAt(day) {
+    return day && typeof day === "object" ? Number(day.updatedAt) || 0 : 0;
+  }
+
+  function cloneDayData(day) {
+    const src = day && typeof day === "object" ? day : {};
+    const out = {};
+    Object.keys(src).forEach((key) => {
+      if (key === "snack") return;
+      if (key === "updatedAt") {
+        out.updatedAt = Number(src.updatedAt) || 0;
+        return;
+      }
+      if (Array.isArray(src[key])) {
+        out[key] = src[key].map((row) => ({
+          uid: row.uid || uid(),
+          productId: row.productId,
+          grams: row.grams,
+        }));
+      }
+    });
+    F.meals.forEach((meal) => {
+      if (!out[meal.id]) out[meal.id] = [];
+    });
+    mergeSnackIntoDinner(out);
+    return out;
+  }
+
+  /** Есть updatedAt — побеждает более новый день целиком. Иначе — непустое по приёмам. */
+  function mergeDay(localDay, remoteDay) {
+    const local = localDay && typeof localDay === "object" ? localDay : null;
+    const remote = remoteDay && typeof remoteDay === "object" ? remoteDay : null;
+    if (!local) return cloneDayData(remote);
+    if (!remote) return cloneDayData(local);
+    const lt = dayUpdatedAt(local);
+    const rt = dayUpdatedAt(remote);
+    if (lt || rt) return cloneDayData(lt >= rt ? local : remote);
+
+    const day = {};
+    const keys = {};
+    Object.keys(local).forEach((key) => {
+      keys[key] = true;
+    });
+    Object.keys(remote).forEach((key) => {
+      keys[key] = true;
+    });
+    Object.keys(keys).forEach((key) => {
+      if (key === "snack" || key === "updatedAt") return;
+      const left = local[key];
+      const right = remote[key];
+      if (Array.isArray(left) || Array.isArray(right)) {
+        day[key] = preferRows(left, right);
+      }
+    });
+    F.meals.forEach((meal) => {
+      if (!day[meal.id]) day[meal.id] = [];
+    });
+    mergeSnackIntoDinner(day);
+    return day;
+  }
+
+  function dayHasContent(day) {
+    if (!day || typeof day !== "object") return false;
+    return F.meals.some((meal) => Array.isArray(day[meal.id]) && day[meal.id].length > 0);
+  }
+
+  function mergeFood(local, remote) {
+    const left = normalizeFood(local);
+    const right = normalizeFood(remote);
+    const days = {};
+    const keys = {};
+    Object.keys(left.days).forEach((iso) => {
+      keys[iso] = true;
+    });
+    Object.keys(right.days).forEach((iso) => {
+      keys[iso] = true;
+    });
+    Object.keys(keys).forEach((iso) => {
+      const merged = mergeDay(left.days[iso], right.days[iso]);
+      if (dayHasContent(merged)) days[iso] = merged;
+    });
+    return { v: Math.max(Number(left.v) || 0, Number(right.v) || 0, 1), days: days };
+  }
+
+  function foodEqual(a, b) {
+    return JSON.stringify(normalizeFood(a)) === JSON.stringify(normalizeFood(b));
   }
 
   function loadUi() {
@@ -192,41 +289,37 @@
     return true;
   }
 
-  function applyTemplateIfNeeded(food) {
-    const today = isoToday();
+  /** Только миграции формы, без сброса дней и без создания пустых дней. */
+  function migrateFood(food) {
     let changed = false;
-    if (food.v !== templateVersion()) {
-      if (!food.days[today]) food.days[today] = emptyDay();
-      food.v = templateVersion();
-      changed = true;
-    } else if (!food.days[today]) {
-      food.days[today] = emptyDay();
-      changed = true;
-    }
     Object.keys(food.days).forEach((iso) => {
       if (mergeSnackIntoDinner(food.days[iso])) changed = true;
+      if (!dayHasContent(food.days[iso])) {
+        delete food.days[iso];
+        changed = true;
+      }
     });
     return changed;
   }
 
   function getDay(iso) {
     const food = loadFood();
-    if (applyTemplateIfNeeded(food)) {
+    if (migrateFood(food)) {
       saveFoodLocal(food);
       queuePush();
     }
-    if (!food.days[iso]) {
-      food.days[iso] = emptyDay();
-      saveFoodLocal(food);
-      queuePush();
-    }
+    if (!food.days[iso]) return emptyDay();
     return food.days[iso];
   }
 
   function setDay(iso, day) {
     const food = loadFood();
-    food.days[iso] = day;
-    food.v = templateVersion();
+    if (dayHasContent(day)) {
+      day.updatedAt = Date.now();
+      food.days[iso] = day;
+    } else {
+      delete food.days[iso];
+    }
     saveFoodLocal(food);
     queuePush();
   }
@@ -264,14 +357,12 @@
       .then((data) => {
         const remote = normalizeFood(data);
         const local = loadFood();
-        const remoteEmpty = !Object.keys(remote.days).length;
-        if (remoteEmpty && Object.keys(local.days).length) {
-          applyTemplateIfNeeded(local);
-          saveFoodLocal(local);
-          return pushFood(local).then(() => true);
+        const merged = mergeFood(local, remote);
+        migrateFood(merged);
+        saveFoodLocal(merged);
+        if (!foodEqual(merged, remote)) {
+          return pushFood(merged).then(() => true);
         }
-        applyTemplateIfNeeded(remote);
-        saveFoodLocal(remote);
         syncState = "Синхрон";
         paintSync();
         return true;
