@@ -14,7 +14,6 @@
   const savebar = document.getElementById("savebar");
   const draft = Object.create(null);
   let syncing = false;
-  let editMode = false;
   let addOpen = false;
 
   if (!window.ZAL) {
@@ -324,12 +323,6 @@
     return emptyWeight(id);
   }
 
-  function weightStatus(id) {
-    if (Object.prototype.hasOwnProperty.call(draft, id)) return "не сохранено";
-    if (Object.prototype.hasOwnProperty.call(weights(), id)) return "мой вес";
-    return "не задан";
-  }
-
   function bump(value, kind, step, dir) {
     const current = parseNum(value);
     const base = current == null ? 0 : current;
@@ -428,35 +421,30 @@
     const value = displayWeight(id);
     const canEdit = unlocked();
     const disabled = canEdit ? "" : " disabled";
-    const status = weightStatus(id);
     const unit = unitOf(exercise);
-    const lockNote = canEdit ? "" : " · только просмотр";
     if (exercise.kind === "text") {
       return (
-        '<div class="stepper text' + (canEdit ? "" : " locked") + '" data-stop>' +
+        '<div class="stepper text' + (canEdit ? "" : " locked") + '">' +
           '<label class="weight"><input data-weight-for="' + esc(id) + '" value="' + esc(value) + '" inputmode="text" autocomplete="off" aria-label="Вес или помощь"' + disabled + "></label>" +
-        "</div>" +
-        '<p class="weight-meta"><span>' + esc(exercise.note) + lockNote + '</span><span data-status-for="' + esc(id) + '">' + esc(status) + "</span></p>"
+        "</div>"
       );
     }
-    // Повторы: только поле ввода, без −/+ и без «кг/рычаг».
+    // Повторы: только поле ввода, без −/+.
     if (unit === "раз") {
       return (
-        '<div class="stepper text' + (canEdit ? "" : " locked") + '" data-stop>' +
+        '<div class="stepper text' + (canEdit ? "" : " locked") + '">' +
           '<label class="weight"><input data-weight-for="' + esc(id) + '" value="' + esc(value) + '" inputmode="numeric" autocomplete="off" enterkeyhint="done" aria-label="Повторы"' + disabled + '><span class="unit">раз</span></label>' +
-        "</div>" +
-        '<p class="weight-meta"><span>' + esc(exercise.note) + lockNote + '</span><span data-status-for="' + esc(id) + '">' + esc(status) + "</span></p>"
+        "</div>"
       );
     }
     const delta = stepLabel(exercise.step);
     const label = unit === "сек" ? "Секунды" : "Вес";
     return (
-      '<div class="stepper' + (canEdit ? "" : " locked") + '" data-stop>' +
+      '<div class="stepper' + (canEdit ? "" : " locked") + '">' +
         '<button type="button" class="step" data-step="-1" data-id="' + esc(id) + '" aria-label="Убавить ' + delta + '"' + disabled + '><span class="sign">−</span><span class="delta">' + delta + "</span></button>" +
         '<label class="weight"><input data-weight-for="' + esc(id) + '" value="' + esc(value) + '" inputmode="decimal" autocomplete="off" enterkeyhint="done" aria-label="' + label + '"' + disabled + '><span class="unit">' + esc(unit) + "</span></label>" +
         '<button type="button" class="step" data-step="1" data-id="' + esc(id) + '" aria-label="Прибавить ' + delta + '"' + disabled + '><span class="sign">+</span><span class="delta">' + delta + "</span></button>" +
-      "</div>" +
-      '<p class="weight-meta"><span>' + esc(exercise.note) + lockNote + '</span><span data-status-for="' + esc(id) + '">' + esc(status) + "</span></p>"
+      "</div>"
     );
   }
 
@@ -516,7 +504,6 @@
     return (
       '<section class="add-picker">' +
         "<h3>Добавить упражнение</h3>" +
-        '<button type="button" class="plan-btn" data-add-close>Закрыть</button>' +
         rows +
       "</section>"
     );
@@ -524,22 +511,12 @@
 
   function planEditBar(plan, scheme) {
     if (!unlocked()) {
-      return '<p class="hint">Чтобы менять порядок списка — введи пароль сверху.</p>';
-    }
-    if (!editMode) {
-      return (
-        '<div class="plan-bar">' +
-          '<button type="button" class="plan-btn" data-edit-on>Изменить список</button>' +
-          (hasPlanOverride(plan, scheme)
-            ? '<button type="button" class="plan-btn ghost" data-plan-reset>Сбросить к плану</button>'
-            : "") +
-        "</div>"
-      );
+      return '<p class="hint">Чтобы менять список — введи пароль сверху.</p>';
     }
     return (
       '<div class="plan-bar">' +
-        '<button type="button" class="plan-btn on" data-edit-off>Готово</button>' +
         '<button type="button" class="plan-btn" data-add-open>Добавить</button>' +
+        (addOpen ? '<button type="button" class="plan-btn" data-add-close>Закрыть</button>' : "") +
         (hasPlanOverride(plan, scheme)
           ? '<button type="button" class="plan-btn ghost" data-plan-reset>Сбросить к плану</button>'
           : "") +
@@ -553,6 +530,7 @@
       ? " Открыт вариант " + scheme + ", в блоке до " + fmt(block.to) + " — " + block.scheme + "."
       : "";
     const slots = getSlots(plan, scheme);
+    const canEdit = unlocked();
     const rows = slots.map((slot, index) => {
       const shown = resolveSlot(slot);
       const exercise = ZAL.exercises[shown.id];
@@ -560,7 +538,7 @@
         return (
           '<article class="ex">' +
             "<p class=\"empty\">Нет карточки: " + esc(shown.id) + "</p>" +
-            (editMode
+            (canEdit
               ? '<div class="ex-tools"><button type="button" data-remove="' + index + '">Удалить</button></div>'
               : "") +
           "</article>"
@@ -568,9 +546,9 @@
       }
       const open = href(plan, scheme, "/s/" + index);
       const cue = shown.cue ? '<p class="cue">' + esc(shown.cue) + "</p>" : "";
-      const tools = editMode
+      const tools = canEdit
         ? (
-          '<div class="ex-tools" data-stop>' +
+          '<div class="ex-tools">' +
             '<button type="button" data-move="-1" data-index="' + index + '" aria-label="Выше"' + (index === 0 ? " disabled" : "") + ">↑</button>" +
             '<button type="button" data-move="1" data-index="' + index + '" aria-label="Ниже"' + (index === slots.length - 1 ? " disabled" : "") + ">↓</button>" +
             '<button type="button" data-remove="' + index + '">Удалить</button>' +
@@ -586,23 +564,23 @@
             '<p class="sets">' + esc(shown.sets) + "</p>" + cue +
             "</div>" +
           "</a>" +
-          (editMode ? "" : stepper(shown.id)) +
         "</article>"
       );
     }).join("");
     app.innerHTML =
-      '<header class="top"><div class="brand"><div><h1>Зал</h1><p>блок до ' + esc(fmt(block.to)) + '</p></div><a class="food-zal-link" href="./">Питание</a></div></header>' +
-      lockBar() +
-      chips(plan, scheme) +
-      '<div class="dayline"><h2>' + esc(plan.title) + "</h2>" +
-      '<div class="scheme" role="group" aria-label="Вариант">' +
-      '<button type="button" data-scheme="A" class="' + (scheme === "A" ? "on" : "") + '">A</button>' +
-      '<button type="button" data-scheme="B" class="' + (scheme === "B" ? "on" : "") + '">B</button>' +
-      "</div></div>" +
-      '<p class="hint">' + esc(plan.kind) + ". " + esc(plan.hint) + mismatch + "</p>" +
-      planEditBar(plan, scheme) +
+      '<header class="top">' +
+        '<div class="brand"><div><h1>Зал</h1><p>блок до ' + esc(fmt(block.to)) + '</p></div><a class="food-zal-link" href="./">Питание</a></div>' +
+        lockBar() +
+        chips(plan, scheme) +
+        '<div class="dayline"><h2>' + esc(plan.title) + "</h2>" +
+        '<div class="scheme" role="group" aria-label="Вариант">' +
+        '<button type="button" data-scheme="A" class="' + (scheme === "A" ? "on" : "") + '">A</button>' +
+        '<button type="button" data-scheme="B" class="' + (scheme === "B" ? "on" : "") + '">B</button>' +
+        "</div></div>" +
+        '<p class="hint">' + esc(plan.kind) + ". " + esc(plan.hint) + mismatch + "</p>" +
+        planEditBar(plan, scheme) +
       "</header>" +
-      (addOpen && editMode ? addPickerHtml(plan, scheme) : "") +
+      (addOpen && canEdit ? addPickerHtml(plan, scheme) : "") +
       rows + backup();
   }
 
@@ -720,20 +698,8 @@
       if (navigator.vibrate) navigator.vibrate(8);
       return;
     }
-    if (event.target.closest("[data-edit-on]")) {
-      if (!unlocked()) return;
-      editMode = true;
-      addOpen = false;
-      render();
-      return;
-    }
-    if (event.target.closest("[data-edit-off]")) {
-      editMode = false;
-      addOpen = false;
-      render();
-      return;
-    }
     if (event.target.closest("[data-add-open]")) {
+      if (!unlocked()) return;
       addOpen = true;
       render();
       window.scrollTo(0, 0);
@@ -890,7 +856,7 @@
   }
 
   function refreshFromServer() {
-    if (hasDraft() || syncing || editMode) return Promise.resolve();
+    if (hasDraft() || syncing || addOpen) return Promise.resolve();
     return Promise.all([pullWeights(), pullPlans()]).then((results) => {
       if (results.some(Boolean)) render();
     });
@@ -898,6 +864,7 @@
 
   window.addEventListener("hashchange", () => {
     const route = parseRoute();
+    if (route.name !== "list") addOpen = false;
     if (route.plan) rememberOpened(route.plan.id);
     render();
   });
