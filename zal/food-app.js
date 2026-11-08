@@ -28,6 +28,9 @@
   let pickerMealId = null;
   let pickerCategory = null;
   let swapUid = null;
+  let calcUid = null;
+  let calcOp = "+";
+  let calcInput = "";
   let syncing = false;
   let syncTimer = null;
   let syncState = "";
@@ -390,6 +393,33 @@
     return F.products[id] || null;
   }
 
+  /** Обычные продукты — одни граммы во всех приёмах; свободные ккал — свои в каждом. */
+  function sharesGramsAcrossMeals(product) {
+    return !!(product && product.unit !== "kcal");
+  }
+
+  function applyCalcOp(current, op, value) {
+    if (op === "+") return current + value;
+    if (op === "-") return Math.max(0, current - value);
+    if (op === "*") return current * value;
+    if (op === "/") return value !== 0 ? current / value : current;
+    return current;
+  }
+
+  function openCalc(uid) {
+    calcUid = uid;
+    calcOp = "+";
+    calcInput = "";
+    pickerMealId = null;
+    swapUid = null;
+  }
+
+  function closeCalc() {
+    calcUid = null;
+    calcOp = "+";
+    calcInput = "";
+  }
+
   function macrosOf(productId, grams) {
     const p = productOf(productId);
     if (!p) return { kcal: 0, protein: 0, fat: 0, carbs: 0 };
@@ -576,12 +606,17 @@
   function gramsInputs(row, product) {
     if (product && product.unit === "kcal") {
       return (
+        '<div class="food-grams-row">' +
         '<label class="food-grams">Ккал' +
         '<input type="number" inputmode="decimal" min="0" step="1" value="' +
         esc(row.grams) +
         '" data-grams="' +
         esc(row.uid) +
-        '"><span>ккал</span></label>'
+        '"><span>ккал</span></label>' +
+        '<button type="button" class="food-icon food-calc-btn" data-calc="' +
+        esc(row.uid) +
+        '" aria-label="Калькулятор ккал" title="Изменить ккал (+ − × ÷)">+</button>' +
+        "</div>"
       );
     }
     if (product && product.dry && cookMulOf(product)) {
@@ -918,9 +953,61 @@
       "</main>" +
       renderFooter(totals) +
       renderPicker(day) +
-      renderSwap(day);
+      renderSwap(day) +
+      renderCalc(day);
 
     document.body.classList.toggle("has-food-footer", true);
+  }
+
+  function rowGramsByUid(day, uid) {
+    let found = null;
+    F.meals.forEach((meal) => {
+      (day[meal.id] || []).forEach((row) => {
+        if (row.uid === uid) found = Number(row.grams) || 0;
+      });
+    });
+    return found;
+  }
+
+  function renderCalc(day) {
+    if (!calcUid) return "";
+    const current = rowGramsByUid(day, calcUid);
+    if (current == null) {
+      closeCalc();
+      return "";
+    }
+    const ops = ["+", "-", "*", "/"];
+    return (
+      '<div class="food-overlay" data-close-calc>' +
+      '<div class="food-sheet food-calc-sheet" role="dialog" aria-label="Калькулятор ккал">' +
+      '<div class="food-sheet-head"><strong>Изменить ккал</strong>' +
+      '<button type="button" class="food-icon" data-close-calc aria-label="Закрыть">×</button></div>' +
+      '<p class="food-calc-current">Сейчас: <strong>' +
+      round0(current) +
+      " ккал</strong></p>" +
+      '<div class="food-calc-ops">' +
+      ops
+        .map(
+          (op) =>
+            '<button type="button" class="' +
+            (op === calcOp ? "on" : "") +
+            '" data-calc-op="' +
+            op +
+            '">' +
+            esc(op) +
+            "</button>"
+        )
+        .join("") +
+      "</div>" +
+      '<label class="food-calc-input">Число' +
+      '<input type="number" inputmode="decimal" min="0" step="1" value="' +
+      esc(calcInput) +
+      '" data-calc-input placeholder="например 50" autofocus></label>' +
+      '<div class="food-calc-actions">' +
+      '<button type="button" data-close-calc>Отмена</button>' +
+      '<button type="button" class="food-calc-apply" data-calc-apply>ОК</button>' +
+      "</div></div></div>"
+    );
   }
 
   function mealIdOfRow(day, uid) {
@@ -946,7 +1033,8 @@
         }
       });
     });
-    if (productId) {
+    const product = productOf(productId);
+    if (productId && sharesGramsAcrossMeals(product)) {
       F.meals.forEach((meal) => {
         (day[meal.id] || []).forEach((row) => {
           if (row.productId === productId) row.grams = grams;
@@ -974,7 +1062,19 @@
     const iso = currentIso();
     const day = getDay(iso);
     if (!day[mealId]) day[mealId] = [];
-    const existing = gramsOfProductInDay(productId);
+
+    // свободные ккал уже в этом приёме — открыть калькулятор (+), а не дублировать
+    if (!sharesGramsAcrossMeals(p)) {
+      const sameMeal = (day[mealId] || []).find((row) => row.productId === productId);
+      if (sameMeal) {
+        openCalc(sameMeal.uid);
+        activateMeal(iso, mealId);
+        render();
+        return;
+      }
+    }
+
+    const existing = sharesGramsAcrossMeals(p) ? gramsOfProductInDay(productId) : null;
     day[mealId].push({
       uid: uid(),
       productId: productId,
@@ -1014,9 +1114,14 @@
       render();
       return;
     }
+    if (event.target.matches("[data-close-calc]")) {
+      closeCalc();
+      render();
+      return;
+    }
 
     const t = event.target.closest(
-      "[data-shift], [data-today], [data-reset], [data-toggle-meal], [data-template], [data-add], [data-add-kcal], [data-remove], [data-swap], [data-cat], [data-pick], [data-swap-to]"
+      "[data-shift], [data-today], [data-reset], [data-toggle-meal], [data-template], [data-add], [data-add-kcal], [data-remove], [data-swap], [data-cat], [data-pick], [data-swap-to], [data-calc], [data-calc-op], [data-calc-apply]"
     );
     if (!t) return;
 
@@ -1047,6 +1152,40 @@
     }
     if (t.hasAttribute("data-add-kcal")) {
       addProduct(t.getAttribute("data-add-kcal"), "free_kcal");
+      return;
+    }
+    if (t.hasAttribute("data-calc")) {
+      openCalc(t.getAttribute("data-calc"));
+      render();
+      const input = app.querySelector("[data-calc-input]");
+      if (input) input.focus();
+      return;
+    }
+    if (t.hasAttribute("data-calc-op")) {
+      calcOp = t.getAttribute("data-calc-op") || "+";
+      render();
+      const input = app.querySelector("[data-calc-input]");
+      if (input) {
+        input.value = calcInput;
+        input.focus();
+      }
+      return;
+    }
+    if (t.hasAttribute("data-calc-apply")) {
+      const iso = currentIso();
+      const day = getDay(iso);
+      const current = rowGramsByUid(day, calcUid);
+      if (current == null) {
+        closeCalc();
+        render();
+        return;
+      }
+      const value = Number(String(calcInput).replace(",", "."));
+      if (!Number.isFinite(value)) return;
+      const next = Math.max(0, round0(applyCalcOp(current, calcOp, value)));
+      const uid = calcUid;
+      closeCalc();
+      updateRowGrams(uid, next);
       return;
     }
     if (t.hasAttribute("data-add")) {
@@ -1106,6 +1245,27 @@
       setDay(iso, day);
       swapUid = null;
       render();
+    }
+  });
+
+  app.addEventListener("input", (event) => {
+    const calcField = event.target.closest("[data-calc-input]");
+    if (calcField) {
+      calcInput = calcField.value;
+    }
+  });
+
+  app.addEventListener("keydown", (event) => {
+    if (!calcUid) return;
+    if (event.key === "Escape") {
+      closeCalc();
+      render();
+      return;
+    }
+    if (event.key === "Enter" && event.target.closest("[data-calc-input]")) {
+      event.preventDefault();
+      const applyBtn = app.querySelector("[data-calc-apply]");
+      if (applyBtn) applyBtn.click();
     }
   });
 
