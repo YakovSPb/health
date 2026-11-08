@@ -294,10 +294,6 @@
     return date.getDate() + " " + MONTHS[date.getMonth()];
   }
 
-  function stepLabel(step) {
-    return String(step).replace(".", ",");
-  }
-
   function parseNum(value) {
     const match = String(value).replace(",", ".").match(/-?\d+(?:\.\d+)?/);
     return match ? parseFloat(match[0]) : null;
@@ -321,15 +317,6 @@
     const saved = weights();
     if (Object.prototype.hasOwnProperty.call(saved, id)) return saved[id];
     return emptyWeight(id);
-  }
-
-  function bump(value, kind, step, dir) {
-    const current = parseNum(value);
-    const base = current == null ? 0 : current;
-    const next = Math.max(0, base + dir * step);
-    const text = formatNum(next);
-    if (kind === "pair") return text + "+" + text;
-    return text;
   }
 
   function parseRoute() {
@@ -422,28 +409,26 @@
     const canEdit = unlocked();
     const disabled = canEdit ? "" : " disabled";
     const unit = unitOf(exercise);
+    const locked = canEdit ? "" : " locked";
     if (exercise.kind === "text") {
       return (
-        '<div class="stepper text' + (canEdit ? "" : " locked") + '">' +
+        '<div class="stepper text' + locked + '">' +
           '<label class="weight"><input data-weight-for="' + esc(id) + '" value="' + esc(value) + '" inputmode="text" autocomplete="off" aria-label="Вес или помощь"' + disabled + "></label>" +
         "</div>"
       );
     }
-    // Повторы: только поле ввода, без −/+.
     if (unit === "раз") {
       return (
-        '<div class="stepper text' + (canEdit ? "" : " locked") + '">' +
+        '<div class="stepper text' + locked + '">' +
           '<label class="weight"><input data-weight-for="' + esc(id) + '" value="' + esc(value) + '" inputmode="numeric" autocomplete="off" enterkeyhint="done" aria-label="Повторы"' + disabled + '><span class="unit">раз</span></label>' +
         "</div>"
       );
     }
-    const delta = stepLabel(exercise.step);
     const label = unit === "сек" ? "Секунды" : "Вес";
+    const mode = unit === "сек" ? "numeric" : "decimal";
     return (
-      '<div class="stepper' + (canEdit ? "" : " locked") + '">' +
-        '<button type="button" class="step" data-step="-1" data-id="' + esc(id) + '" aria-label="Убавить ' + delta + '"' + disabled + '><span class="sign">−</span><span class="delta">' + delta + "</span></button>" +
-        '<label class="weight"><input data-weight-for="' + esc(id) + '" value="' + esc(value) + '" inputmode="decimal" autocomplete="off" enterkeyhint="done" aria-label="' + label + '"' + disabled + '><span class="unit">' + esc(unit) + "</span></label>" +
-        '<button type="button" class="step" data-step="1" data-id="' + esc(id) + '" aria-label="Прибавить ' + delta + '"' + disabled + '><span class="sign">+</span><span class="delta">' + delta + "</span></button>" +
+      '<div class="stepper text' + locked + '">' +
+        '<label class="weight"><input data-weight-for="' + esc(id) + '" value="' + esc(value) + '" inputmode="' + mode + '" autocomplete="off" enterkeyhint="done" aria-label="' + label + '"' + disabled + '><span class="unit">' + esc(unit) + "</span></label>" +
       "</div>"
     );
   }
@@ -688,17 +673,6 @@
   });
 
   app.addEventListener("click", (event) => {
-    const stepBtn = event.target.closest("[data-step]");
-    if (stepBtn) {
-      if (!unlocked()) return;
-      const id = stepBtn.dataset.id;
-      const exercise = ZAL.exercises[id];
-      const next = bump(getWeight(id), exercise.kind, exercise.step, Number(stepBtn.dataset.step));
-      setDraft(id, next);
-      paintWeight(id, next);
-      if (navigator.vibrate) navigator.vibrate(8);
-      return;
-    }
     if (event.target.closest("[data-add-open]")) {
       if (!unlocked()) return;
       addOpen = true;

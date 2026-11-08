@@ -165,31 +165,9 @@ button { cursor: pointer; }
 
 .stepper {
   display: grid;
-  grid-template-columns: 76px 1fr 76px;
-  gap: 8px;
+  grid-template-columns: 1fr;
   align-items: stretch;
 }
-
-.stepper.text {
-  grid-template-columns: 1fr;
-}
-
-.step {
-  border: 0;
-  border-radius: 14px;
-  background: var(--accent);
-  color: var(--accent-ink);
-  min-height: 64px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  font-weight: 800;
-}
-
-.step .sign { font-size: 1.4rem; }
-.step .delta { font-size: 0.85rem; margin-top: 4px; }
 
 .weight {
   display: flex;
@@ -390,7 +368,6 @@ button { cursor: pointer; }
   font-size: 0.9rem;
 }
 
-.stepper.locked .step,
 .stepper.locked .weight input {
   opacity: 0.45;
 }
