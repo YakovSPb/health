@@ -564,6 +564,7 @@
             '<p class="sets">' + esc(shown.sets) + "</p>" + cue +
             "</div>" +
           "</a>" +
+          stepper(shown.id) +
         "</article>"
       );
     }).join("");

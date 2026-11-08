@@ -136,6 +136,7 @@ button { cursor: pointer; }
   gap: 12px;
   text-decoration: none;
   color: inherit;
+  margin-bottom: 12px;
 }
 
 .thumb, .photo img, #zoom img {
