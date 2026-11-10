@@ -27,6 +27,35 @@
     return localStorage.getItem(AUTH_KEY) === "1";
   }
 
+  function sitesNavHtml(current) {
+    const items = [
+      { id: "track", href: "https://track.diabal.ru/", label: "Трэк" },
+      { id: "memo", href: "https://memo.diabal.ru/", label: "Мемо" },
+      { id: "zal", href: "https://zal.diabal.ru/zal.html", label: "Зал" },
+      { id: "food", href: "https://zal.diabal.ru/", label: "Питание" },
+    ];
+    return (
+      '<nav class="sites-nav" aria-label="Сайты">' +
+        items
+          .map((item) => {
+            const on = item.id === current;
+            return (
+              '<a href="' +
+              item.href +
+              '" class="' +
+              (on ? "on" : "") +
+              '"' +
+              (on ? ' aria-current="page"' : "") +
+              ">" +
+              item.label +
+              "</a>"
+            );
+          })
+          .join("") +
+      "</nav>"
+    );
+  }
+
   function lockBar() {
     if (unlocked()) return "";
     return (
@@ -456,7 +485,8 @@
       '<a href="' + href(day, chosenScheme()) + '"><strong>' + esc(day.title) + "</strong><span>" + esc(day.kind) + "</span></a>"
     ).join("");
     app.innerHTML =
-      '<header class="top"><div class="brand"><h1>Зал</h1><a class="food-zal-link" href="./">Питание</a></div></header>' +
+      sitesNavHtml("zal") +
+      '<header class="top"><div class="brand"><h1>Зал</h1></div></header>' +
       lockBar() +
       '<p class="hint">' + esc(note) + "</p>" +
       '<div class="home-list">' + cards + focus + "</div>" +
@@ -554,8 +584,9 @@
       );
     }).join("");
     app.innerHTML =
+      sitesNavHtml("zal") +
       '<header class="top">' +
-        '<div class="brand"><div><h1>Зал</h1><p>блок до ' + esc(fmt(block.to)) + '</p></div><a class="food-zal-link" href="./">Питание</a></div>' +
+        '<div class="brand"><div><h1>Зал</h1><p>блок до ' + esc(fmt(block.to)) + "</p></div></div>" +
         lockBar() +
         chips(plan, scheme) +
         '<div class="dayline"><h2>' + esc(plan.title) + "</h2>" +

@@ -1,6 +1,6 @@
 window.FOOD = {
   templateVersion: 10,
-  targetKcal: 2000,
+  targetKcal: 2400,
   targetProtein: 180,
   maintenanceKcal: 2900,
   kcalPerKg: 7700,

@@ -35,6 +35,35 @@
   let syncTimer = null;
   let syncState = "";
 
+  function sitesNavHtml(current) {
+    const items = [
+      { id: "track", href: "https://track.diabal.ru/", label: "Трэк" },
+      { id: "memo", href: "https://memo.diabal.ru/", label: "Мемо" },
+      { id: "zal", href: "https://zal.diabal.ru/zal.html", label: "Зал" },
+      { id: "food", href: "https://zal.diabal.ru/", label: "Питание" },
+    ];
+    return (
+      '<nav class="sites-nav" aria-label="Сайты">' +
+        items
+          .map((item) => {
+            const on = item.id === current;
+            return (
+              '<a href="' +
+              item.href +
+              '" class="' +
+              (on ? "on" : "") +
+              '"' +
+              (on ? ' aria-current="page"' : "") +
+              ">" +
+              item.label +
+              "</a>"
+            );
+          })
+          .join("") +
+      "</nav>"
+    );
+  }
+
   function esc(value) {
     return String(value == null ? "" : value)
       .replace(/&/g, "&amp;")
@@ -930,6 +959,7 @@
     const isToday = iso === isoToday();
 
     app.innerHTML =
+      sitesNavHtml("food") +
       '<header class="top food-top">' +
       '<div class="brand">' +
       "<div><h1>Питание</h1><p>" +
@@ -937,7 +967,6 @@
       formatDate(iso) +
       (syncState ? ' · <span data-sync>' + esc(syncState) + "</span>" : "") +
       "</p></div>" +
-      '<a class="food-zal-link" href="zal.html">Зал</a>' +
       "</div>" +
       '<div class="food-daynav">' +
       '<button type="button" data-shift="-1" aria-label="Вчера">‹</button>' +

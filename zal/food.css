@@ -2,19 +2,6 @@
   align-items: center;
 }
 
-.food-zal-link {
-  border: 1px solid var(--line);
-  background: var(--card);
-  color: var(--ink);
-  text-decoration: none;
-  border-radius: 999px;
-  padding: 10px 16px;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  font-weight: 600;
-}
-
 .food-daynav {
   display: flex;
   gap: 8px;
