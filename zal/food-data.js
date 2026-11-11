@@ -1,5 +1,5 @@
 window.FOOD = {
-  templateVersion: 10,
+  templateVersion: 11,
   targetKcal: 2400,
   targetProtein: 180,
   maintenanceKcal: 2900,
@@ -94,7 +94,7 @@ window.FOOD = {
       protein: 4.5,
       fat: 2,
       carbs: 5,
-      defaultGrams: 100,
+      defaultGrams: 30,
       note: "к творогу",
     },
     oats: {
@@ -363,7 +363,7 @@ window.FOOD = {
       protein: 0.1,
       fat: 1,
       carbs: 82,
-      defaultGrams: 10,
+      defaultGrams: 20,
       note: "в кашу или творог, 1 раз",
     },
     raisins: {
@@ -417,6 +417,16 @@ window.FOOD = {
       fat: 44,
       carbs: 30,
       defaultGrams: 22,
+    },
+    hazelnut: {
+      id: "hazelnut",
+      title: "Фундук",
+      category: "nuts",
+      kcal: 628,
+      protein: 15,
+      fat: 61,
+      carbs: 17,
+      defaultGrams: 19,
     },
     oil: {
       id: "oil",
@@ -513,8 +523,8 @@ window.FOOD = {
     quinoa: { productId: "tomato_paste", grams: 30 },
   },
   proteinAddons: {
-    cottage1: { productId: "yogurt2", grams: 100 },
-    cottage5: { productId: "yogurt2", grams: 100 },
+    cottage1: { productId: "yogurt2", grams: 30 },
+    cottage5: { productId: "yogurt2", grams: 30 },
   },
 
   defaultDay: {
@@ -522,7 +532,7 @@ window.FOOD = {
       { productId: "eggs", grams: 3 },
       { productId: "chicken", grams: 140 },
       { productId: "oats", grams: 50 },
-      { productId: "cranberry", grams: 10 },
+      { productId: "cranberry", grams: 20 },
       { productId: "leaf_salad", grams: 150 },
       { productId: "almond", grams: 20 },
     ],
@@ -535,7 +545,7 @@ window.FOOD = {
     ],
     dinner: [
       { productId: "cottage1", grams: 300 },
-      { productId: "yogurt2", grams: 100 },
+      { productId: "yogurt2", grams: 30 },
       { productId: "quinoa", grams: 50 },
       { productId: "tomato_paste", grams: 30 },
       { productId: "cabbage_sauerkraut", grams: 150 },
