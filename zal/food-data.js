@@ -223,6 +223,18 @@ window.FOOD = {
       defaultGrams: 30,
       note: "к киноа",
     },
+    coconut_milk: {
+      id: "coconut_milk",
+      title: "Кокосовое молоко",
+      category: "topping",
+      kcal: 185,
+      protein: 1.6,
+      fat: 19,
+      carbs: 2,
+      defaultGrams: 10,
+      unit: "ml",
+      note: "Aroy-D 17–19%, на 100 мл",
+    },
     leaf_salad: {
       id: "leaf_salad",
       title: "Салат листовой",
